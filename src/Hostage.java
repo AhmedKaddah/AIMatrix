@@ -1,4 +1,5 @@
 import java.util.Random;
+import java.util.ArrayList; // import the ArrayList class
 
 public class Hostage extends Occupant {
 	
@@ -11,4 +12,6 @@ public class Hostage extends Occupant {
 		
 		
 	}
+
+
 }
