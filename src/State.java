@@ -8,34 +8,68 @@ public class State {
     public ArrayList<Agent> turnedToAgents = new ArrayList<Agent>(); // Create an ArrayList object
     public ArrayList<Agent> Agents = new ArrayList<Agent>(); // Create an ArrayList object
     public ArrayList<Pill> Pills = new ArrayList<Pill>(); // Create an ArrayList object
+    public ArrayList<LaunchingPad> LaunchingPads = new ArrayList<LaunchingPad>(); // Create an ArrayList object
 
+    public String stringifiedGrid;
     public Neo Neo;
+    public TeleBooth teleBooth;
     int savedHostages;
+    public String hostagesString;
+    public String launchpadString;
+    public String pillsString;
+    public String agentsString;
 
-    public State(Tile[][] map, Neo neo) {
+    public State(Tile[][] map, Neo neo , String oldState) {
         this.map = map;
         this.Neo = neo;
+        this.hostagesString = "";
+        this.launchpadString = "";
+        this.pillsString = "";
+        this.agentsString = "";
+        // this.launchingPadsString = oldState[6].split(",");
+
 
         for (int i = 0; i < map[0].length; i++) {
             for (int j = 0; j < map[0].length; j++) {
                 Tile t = map[i][j];
                 if (t.occupant.getClass().toString().equals("class Hostage")) {
-                    unsavedHostages.add((Hostage) t.occupant);
+                    Hostage host = (Hostage) t.occupant;
+                    unsavedHostages.add(host);
+                    hostagesString+=t.occupant.x + "," + t.occupant.y + "," + host.damage;
                 }
                 if (t.occupant.getClass().toString().equals("class Agent")) {
+                    Agent agent = (Agent) t.occupant;
+
                     if (((Agent) t.occupant).wasHostage) {
-                        turnedToAgents.add((Agent) t.occupant);
+                        turnedToAgents.add(agent);
                     } else {
-                        Agents.add((Agent) t.occupant);
+                        Agents.add(agent);
 
                     }
+                    agentsString+= agent.x + "," + agent.y;
+
                 }
                 if (t.occupant.getClass().toString().equals("class Pill")) {
-                    Pills.add((Pill) t.occupant);
+                    Pill p = (Pill) t.occupant;
+                    Pills.add(p);
+                    pillsString += p.x + "," + p.y;
+                }
+                if (t.occupant.getClass().toString().equals("class TeleBooth")) {
+                    this.teleBooth = (TeleBooth)t.occupant;
+
+                }
+                if (t.occupant.getClass().toString().equals("class LaunchingPad")) {
+                    LaunchingPad p =(LaunchingPad) t.occupant;
+                    LaunchingPads.add((LaunchingPad) t.occupant);
+
                 }
 
             }
         }
+        stringifiedGrid += this.map.length + "," + this.map[0].length + ";";
+        stringifiedGrid += Neo.maxCarriedHostages + ";" + Neo.x + "," + Neo.y + ";";
+		stringifiedGrid += this.teleBooth.x + "," + this.teleBooth.y + ";";
+
     }
 
     public String stringifyGrid(Tile map[][]) {

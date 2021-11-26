@@ -10,6 +10,9 @@ public class Matrix {
 	public static int randLaunchingPads;
 	public static Neo Neo;
 	public static TeleBooth TeleBooth;
+	public static int kills;
+    public static int nodes;
+    public static int deaths;
 
 
 	public static void genGrid() {
@@ -23,7 +26,8 @@ public class Matrix {
 				map[i][j] = new Tile();
 			}
 		}
-
+		
+		
 		// Generating random numbers
 		int randTeleBooth = rn.nextInt(gridSize * gridSize);
 		randHostages = rn.nextInt(8) + 3;
@@ -52,6 +56,8 @@ public class Matrix {
 
 		}
 
+
+
 		stringifiedGrid += Neo.maxCarriedHostages + ";" + Neo.x + "," + Neo.y + ";";
 
 		stringifiedGrid += TeleBooth.x + "," + TeleBooth.y + ";";
@@ -69,6 +75,15 @@ public class Matrix {
 			}
 
 		}
+
+		//initialize hostages index in neo.
+
+		for (int i = 0; i <randHostages; i++) {
+			Neo.carriedHostagesIndex.add(false);
+
+		}
+
+
 		stringifiedGrid = stringifiedGrid.substring(0, stringifiedGrid.length() - 1);
 		stringifiedGrid += ";";
 
@@ -161,7 +176,7 @@ public class Matrix {
 		String pillsString[] = splitString[5].split(",");
 		String launchingPadsString[] = splitString[6].split(",");
 		String hostagesString[] = splitString[7].split(",");
-
+	
 		int[] mapInts = new int[mapString.length];
 		for (int i = 0; i < mapString.length; i++) {
 			mapInts[i] = Integer.parseInt(mapString[i]);
@@ -228,6 +243,14 @@ public class Matrix {
 		}
 		System.out.println(Arrays.deepToString(map).replace("], ", "]\n"));
 
+	}
+
+
+	public String solve(){
+		
+
+
+		return"";
 	}
 
 	public static void main(String[] args) {
