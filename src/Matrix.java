@@ -1,4 +1,5 @@
 import java.util.Arrays;
+import java.util.Hashtable;
 import java.util.Random;
 
 public class Matrix {
@@ -11,11 +12,12 @@ public class Matrix {
 	public static Neo Neo;
 	public static TeleBooth TeleBooth;
 	public static int kills;
-    public static int nodes;
-    public static int deaths;
+	public static int nodes;
+	public static int deaths;
 
+	public static Hashtable<String, Integer> stateHash;
 
-	public static void genGrid() {
+	public static String genGrid() {
 		String stringifiedGrid = "";
 		Random rn = new Random();
 		gridSize = rn.nextInt(11) + 5;
@@ -26,8 +28,7 @@ public class Matrix {
 				map[i][j] = new Tile();
 			}
 		}
-		
-		
+
 		// Generating random numbers
 		int randTeleBooth = rn.nextInt(gridSize * gridSize);
 		randHostages = rn.nextInt(8) + 3;
@@ -47,7 +48,7 @@ public class Matrix {
 
 			int mapPosition = rn.nextInt(gridSize * gridSize);
 			if (map[mapPosition / gridSize][mapPosition % gridSize].isEmpty) {
-				Neo = new Neo(mapPosition / gridSize, mapPosition % gridSize);
+				Neo = new Neo(mapPosition / gridSize, mapPosition % gridSize, randHostages);
 				map[mapPosition / gridSize][mapPosition % gridSize].hasNeo = true;
 				map[mapPosition / gridSize][mapPosition % gridSize].isEmpty = false;
 			} else {
@@ -55,8 +56,6 @@ public class Matrix {
 			}
 
 		}
-
-
 
 		stringifiedGrid += Neo.maxCarriedHostages + ";" + Neo.x + "," + Neo.y + ";";
 
@@ -76,13 +75,12 @@ public class Matrix {
 
 		}
 
-		//initialize hostages index in neo.
+		// initialize hostages index in neo.
 
-		for (int i = 0; i <randHostages; i++) {
+		for (int i = 0; i < randHostages; i++) {
 			Neo.carriedHostagesIndex.add(false);
 
 		}
-
 
 		stringifiedGrid = stringifiedGrid.substring(0, stringifiedGrid.length() - 1);
 		stringifiedGrid += ";";
@@ -164,6 +162,7 @@ public class Matrix {
 
 		System.out.println(Arrays.deepToString(map).replace("], ", "]\n"));
 		System.out.println(stringifiedGrid);
+		return (stringifiedGrid);
 	}
 
 	public static void stringToGrid(String stringGrid) {
@@ -176,7 +175,7 @@ public class Matrix {
 		String pillsString[] = splitString[5].split(",");
 		String launchingPadsString[] = splitString[6].split(",");
 		String hostagesString[] = splitString[7].split(",");
-	
+
 		int[] mapInts = new int[mapString.length];
 		for (int i = 0; i < mapString.length; i++) {
 			mapInts[i] = Integer.parseInt(mapString[i]);
@@ -216,7 +215,7 @@ public class Matrix {
 				map[i][j] = new Tile();
 			}
 		}
-		Neo = new Neo(neoInts[0], neoInts[1]);
+		Neo = new Neo(neoInts[0], neoInts[1], hostagesInts.length / 3);
 		Neo.maxCarriedHostages = maxCarriedHostagesInts;
 		map[Neo.x][Neo.y].hasNeo = true;
 		TeleBooth = new TeleBooth(teleboothInts[0], teleboothInts[1]);
@@ -245,16 +244,39 @@ public class Matrix {
 
 	}
 
+	public String solve() {
 
-	public String solve(){
-		
-
-
-		return"";
+		return "";
 	}
 
 	public static void main(String[] args) {
 		// stringToGrid("5,5;3;2,4;0,4;0,0,4,1;3,3,3,2;2,0,4,3;0,3,1,4,2,16,2,1,35,3,4,63,2,3,7,4,0,92,4,4,19");
-		genGrid();
+		// genGrid();
+		Neo tempNeo = new Neo(2, 4, 7);
+		tempNeo.maxCarriedHostages = 3;
+		Node s0 = new Node("5,5;3;2,4;0,4;0,0,4,4;2,4,3,2;2,0,4,3;0,3,1,4,2,16,2,1,35,3,4,63,2,3,7,3,4,97,4,4,19", 0,
+				null, tempNeo);
+		stateHash = new Hashtable<String, Integer>();
+		s0.expandNode();
+		System.out.println(s0.state);
+		s0.right.expandNode();
+		s0.down.expandNode();
+		System.out.println(s0.down.up.state);
+		// s0.down.right.right.expandNode();
+		// up.right.carry.expandNode();
+		// s0.right.carry.right.expandNode();
+		// s0.right.expandNode();
+		// s0.left.left.expandNode();
+		// s0.left.left.down.expandNode();
+		// System.out.println(s0.right.state);
+		// System.out.println(s0.right.carry.state);
+		// System.out.println(s0.right.carry.down.state);
+
+		// s0.left.left.down.down.expandNode();
+		// s0.left.left.down.down.down.expandNode();
+		// System.out.println(s0.left.left.down.down.down.state);
+		// System.out.println(s0.right.neo.carriedSoFar);
+		// System.out.println(s0.right.carry.neo.carriedSoFar);
+
 	}
 }

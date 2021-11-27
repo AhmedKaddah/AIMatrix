@@ -26,7 +26,6 @@ public class State {
         this.launchpadString = "";
         this.pillsString = "";
         this.agentsString = "";
-        // this.launchingPadsString = oldState[6].split(",");
 
 
         for (int i = 0; i < map[0].length; i++) {
