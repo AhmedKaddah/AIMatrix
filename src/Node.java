@@ -5,7 +5,15 @@ import java.util.stream.IntStream;
 public class Node {
 
     String state;
+
     int accumilativeCost;
+
+    int numberOfHostages;
+    int numberOfAgents;
+    int numberOfPills;
+    int hostagesToMinus;
+    int agentsToMinus;
+    int pillsToMinus;
 
     Node parent;
     Node up;
@@ -29,11 +37,17 @@ public class Node {
     int dropCost;
     int carryCost;
 
-    public Node(String state, int accumilativeCost, Node parent, Neo neo) {
+    boolean isGoal;
+
+    public Node(String state, int accumilativeCost, Node parent, Neo neo, int numberOfAgents, int numberOfHostages,
+            int numberOfPills) {
         this.state = state;
         this.accumilativeCost = accumilativeCost;
         this.parent = parent;
         this.neo = neo;
+        this.numberOfAgents = numberOfAgents;
+        this.numberOfHostages = numberOfHostages;
+        this.numberOfPills = numberOfPills;
 
     }
 
@@ -70,8 +84,9 @@ public class Node {
     }
 
     public Node expandNode() {
-
+        Matrix.numberOfExpanded++;
         if (this.goalTest()) {
+            isGoal = true;
             return this;
 
         }
@@ -92,20 +107,123 @@ public class Node {
     }
 
     public boolean goalTest() {
+
+        int k = 0;
+        if (numberOfAgents == 0) {
+            k++;
+        }
+        if (numberOfPills == 0) {
+            k++;
+        }
+        String splitString[] = this.state.split(";");
+        String neoString[] = splitString[2].split(",");
+        String teleboothString[] = splitString[3].split(",");
+        String hostagesString[] = {};
+        if (numberOfHostages != 0) {
+            hostagesString = splitString[7 - k].split(",");
+        }
+        int[] neoInts = new int[neoString.length];
+        for (int i = 0; i < neoString.length; i++) {
+            neoInts[i] = Integer.parseInt(neoString[i]);
+        }
+        int[] teleboothInts = new int[teleboothString.length];
+        for (int i = 0; i < teleboothString.length; i++) {
+            teleboothInts[i] = Integer.parseInt(teleboothString[i]);
+        }
+        int[] hostagesInts = new int[hostagesString.length];
+        for (int i = 0; i < hostagesString.length; i++) {
+            hostagesInts[i] = Integer.parseInt(hostagesString[i]);
+
+        }
+
+        if (Matrix.turnedToAgents.size() == 0 && neoInts[0] == teleboothInts[0] && neoInts[1] == teleboothInts[1]) {
+            for (int i = 0; i < hostagesInts.length; i += 3) {
+                if (teleboothInts[0] != hostagesInts[i] || teleboothInts[1] != hostagesInts[i + 1]) {
+                    return false;
+                }
+            }
+            return true;
+        }
         return false;
     }
 
+    public boolean actionRepeatedCheck(String action) {
+        if (this.parent != null)
+            switch (action) {
+                case "up":
+                    if (this.parent.down != null) {
+                        return true;
+                    }
+                    break;
+                case "down":
+                    if (this.parent.up != null) {
+                        return true;
+                    }
+                    break;
+                case "left":
+                    if (this.parent.right != null) {
+                        return true;
+                    }
+                    break;
+                case "right":
+                    if (this.parent.left != null) {
+                        return true;
+                    }
+                    break;
+                case "fly":
+                    if (this.parent.fly != null) {
+                        return true;
+                    }
+                    break;
+
+            }
+        return false;
+    }
+
+    public void removeFromTurnedToAgents(int x, int y) {
+        for (int i = 0; i < Matrix.turnedToAgents.size(); i += 2) {
+            if (Matrix.turnedToAgents.get(i) == x && Matrix.turnedToAgents.get(i + 1) == y) {
+                Matrix.turnedToAgents.remove(i);
+                Matrix.turnedToAgents.remove(i);
+            }
+        }
+    }
+
     public Node applyOperator(String action) {
+        // System.out.println(action + "<-->" + this.state);
+        // System.out.println("NUMBER OF PILLS?" + this.numberOfPills);
+
+        pillsToMinus = 0;
+        agentsToMinus = 0;
+        hostagesToMinus = 0;
+        int k = 0;
+
         Boolean actionEligible = true;
         String splitString[] = this.state.split(";");
         String mapString[] = splitString[0].split(",");
         String maxCarriedHostagesString = splitString[1];
         String neoString[] = splitString[2].split(",");
         String teleboothString[] = splitString[3].split(",");
-        String agentsString[] = splitString[4].split(",");
-        String pillsString[] = splitString[5].split(",");
-        String launchingPadsString[] = splitString[6].split(",");
-        String hostagesString[] = splitString[7].split(",");
+        String agentsString[] = {};
+        if (numberOfAgents == 0) {
+            k++;
+        } else {
+            agentsString = splitString[4 - k].split(",");
+        }
+
+        String pillsString[] = {};
+
+        if (numberOfPills == 0) {
+            k++;
+        } else {
+            pillsString = splitString[5 - k].split(",");
+        }
+        String launchingPadsString[] = splitString[6 - k].split(",");
+
+        String hostagesString[] = {};
+        if (numberOfHostages != 0) {
+            hostagesString = splitString[7 - k].split(",");
+        }
 
         int[] mapInts = new int[mapString.length];
         for (int i = 0; i < mapString.length; i++) {
@@ -126,8 +244,10 @@ public class Node {
         for (int i = 0; i < agentsString.length; i++) {
             agentsInts[i] = Integer.parseInt(agentsString[i]);
         }
+
         int[] pillsInts = new int[pillsString.length];
         for (int i = 0; i < pillsString.length; i++) {
+
             pillsInts[i] = Integer.parseInt(pillsString[i]);
         }
         int[] launchingPadsInts = new int[launchingPadsString.length];
@@ -144,267 +264,290 @@ public class Node {
 
         switch (action) {
 
-        case "up":
-            boolean Wall = false;
-            boolean Agent = false;
-            boolean prevented;
-            // check if neo can move up
-            if (neoInts[1] < mapInts[1] - 1) {
-                // action is possible
-                Wall = false;
-            } else {
-                Wall = true;
-            }
-            for (int i = 1; i < agentsInts.length; i = i + 2) {
-                int agentY = agentsInts[i];
-                int agentX = agentsInts[i - 1];
-                if (neoInts[1] + 1 == agentY && neoInts[0] == agentX) {
-                    Agent = true;
+            case "up":
+                if (this.actionRepeatedCheck("up")) {
+                    actionEligible = false;
                     break;
                 }
-            }
-
-            for (int i = 0; i < hostagesInts.length; i += 3) {
-                int hostageX = hostagesInts[i];
-                int hostageY = hostagesInts[i + 1];
-                int hostageDamage = hostagesInts[i + 2];
-                if (neoInts[0] == hostageX && neoInts[1] + 1 == hostageY && hostageDamage >= 98) {
-                    Agent = true;
+                boolean Wall = false;
+                boolean Agent = false;
+                boolean prevented;
+                // check if neo can move up
+                if (neoInts[1] < mapInts[1] - 1) {
+                    // action is possible
+                    Wall = false;
+                } else {
+                    Wall = true;
                 }
-
-            }
-            prevented = Wall || Agent;
-            if (!prevented) {
-                neoInts[1] = neoInts[1] + 1;
-                for (int i = 0; i < neo.carriedHostagesIndex.size(); i++) {
-                    if (neo.carriedHostagesIndex.get(i).equals(true)) {
-                        hostagesInts[i * 3 + 1] = neoInts[1];
+                for (int i = 1; i < agentsInts.length; i = i + 2) {
+                    int agentY = agentsInts[i];
+                    int agentX = agentsInts[i - 1];
+                    if (neoInts[1] + 1 == agentY && neoInts[0] == agentX) {
+                        Agent = true;
+                        break;
                     }
                 }
-                newNeo = new Neo(this.neo, neoInts[0], neoInts[1], this.neo.carriedHostagesIndex, this.neo.damage,
-                        this.neo.carriedSoFar);
-            } else {
-                actionEligible = false;
-            }
 
-            break;
-        case "down":
-            Wall = false;
-            Agent = false;
-
-            // check if neo can move up
-            if (neoInts[1] > 0) {
-                // action is possible
-                Wall = false;
-            } else {
-                Wall = true;
-            }
-            for (int i = 1; i < agentsInts.length; i = i + 2) {
-                int agentY = agentsInts[i];
-                int agentX = agentsInts[i - 1];
-                if (neoInts[1] - 1 == agentY && neoInts[0] == agentX) {
-                    Agent = true;
-                    break;
-                }
-            }
-            for (int i = 0; i < hostagesInts.length; i += 3) {
-                int hostageX = hostagesInts[i];
-                int hostageY = hostagesInts[i + 1];
-                int hostageDamage = hostagesInts[i + 2];
-                if (neoInts[0] == hostageX && neoInts[1] - 1 == hostageY && hostageDamage >= 98) {
-                    Agent = true;
-                }
-
-            }
-            prevented = Wall || Agent;
-            if (!prevented) {
-                neoInts[1] = neoInts[1] - 1;
-                for (int i = 0; i < neo.carriedHostagesIndex.size(); i++) {
-                    if (neo.carriedHostagesIndex.get(i).equals(true)) {
-                        hostagesInts[i * 3 + 1] = neoInts[1];
+                for (int i = 0; i < hostagesInts.length; i += 3) {
+                    int hostageX = hostagesInts[i];
+                    int hostageY = hostagesInts[i + 1];
+                    int hostageDamage = hostagesInts[i + 2];
+                    if (neoInts[0] == hostageX && neoInts[1] + 1 == hostageY && hostageDamage >= 98) {
+                        Agent = true;
                     }
-                }
-                newNeo = new Neo(this.neo, neoInts[0], neoInts[1], this.neo.carriedHostagesIndex, this.neo.damage,
-                        this.neo.carriedSoFar);
-            } else {
-                actionEligible = false;
-            }
 
-            break;
-        case "left":
-            Wall = false;
-            Agent = false;
-
-            // check if neo can move left
-            if (neoInts[0] > 0) {
-                // action is possible
-                Wall = false;
-            } else {
-                Wall = true;
-            }
-            for (int i = 0; i < agentsInts.length; i = i + 2) {
-                int agentX = agentsInts[i];
-                int agentY = agentsInts[i + 1];
-                if (neoInts[0] - 1 == agentX && neoInts[1] == agentY) {
-                    Agent = true;
-                    break;
                 }
-            }
-            for (int i = 0; i < hostagesInts.length; i += 3) {
-                int hostageX = hostagesInts[i];
-                int hostageY = hostagesInts[i + 1];
-                int hostageDamage = hostagesInts[i + 2];
-                if (neoInts[0] - 1 == hostageX && neoInts[1] == hostageY && hostageDamage >= 98) {
-                    Agent = true;
-                }
-
-            }
-            prevented = Wall || Agent;
-            if (!prevented) {
-                neoInts[0] = neoInts[0] - 1;
-                for (int i = 0; i < neo.carriedHostagesIndex.size(); i++) {
-                    if (neo.carriedHostagesIndex.get(i).equals(true)) {
-                        hostagesInts[i * 3] = neoInts[0];
+                prevented = Wall || Agent;
+                if (!prevented) {
+                    neoInts[1] = neoInts[1] + 1;
+                    for (int i = 0; i < neo.carriedHostagesIndex.size(); i++) {
+                        if (neo.carriedHostagesIndex.get(i).equals(true)) {
+                            hostagesInts[i * 3 + 1] = neoInts[1];
+                        }
                     }
-                }
-                newNeo = new Neo(this.neo, neoInts[0], neoInts[1], this.neo.carriedHostagesIndex, this.neo.damage,
-                        this.neo.carriedSoFar);
-            } else {
-                actionEligible = false;
-            }
-            break;
-        case "right":
-            Wall = false;
-            Agent = false;
-
-            // check if neo can move right
-            if (neoInts[0] < mapInts[1] - 1) {
-                // action is possible
-                Wall = false;
-            } else {
-                Wall = true;
-            }
-            for (int i = 0; i < agentsInts.length; i = i + 2) {
-                int agentX = agentsInts[i];
-                int agentY = agentsInts[i + 1];
-                if (neoInts[0] + 1 == agentX && agentY == neoInts[1]) {
-                    Agent = true;
-                    break;
-                }
-            }
-            for (int i = 0; i < hostagesInts.length; i += 3) {
-                int hostageX = hostagesInts[i];
-                int hostageY = hostagesInts[i + 1];
-                int hostageDamage = hostagesInts[i + 2];
-                if (neoInts[0] + 1 == hostageX && neoInts[1] == hostageY && hostageDamage >= 98) {
-                    Agent = true;
-                }
-
-            }
-            prevented = Wall || Agent;
-            if (!prevented) {
-                neoInts[0] = neoInts[0] + 1;
-                for (int i = 0; i < neo.carriedHostagesIndex.size(); i++) {
-                    if (neo.carriedHostagesIndex.get(i).equals(true)) {
-                        hostagesInts[i * 3] = neoInts[0];
-                    }
-                }
-                newNeo = new Neo(this.neo, neoInts[0], neoInts[1], this.neo.carriedHostagesIndex, this.neo.damage,
-                        this.neo.carriedSoFar);
-            } else {
-                actionEligible = false;
-            }
-
-            break;
-        case "kill":
-            Boolean agentKilled = false;
-            Agent = false;
-            // how can we kill?
-            for (int i = 0; i < hostagesInts.length; i += 3) {
-                int hostageX = hostagesInts[i];
-                int hostageY = hostagesInts[i + 1];
-                int hostageDamage = hostagesInts[i + 2];
-                if (neoInts[0] == hostageX && neoInts[1] == hostageY && hostageDamage >= 98) {
+                    newNeo = new Neo(this.neo, neoInts[0], neoInts[1], this.neo.carriedHostagesIndex, this.neo.damage,
+                            this.neo.carriedSoFar);
+                } else {
                     actionEligible = false;
                 }
 
-            }
-            if (neo.damage + 20 < 100 && actionEligible) {
+                break;
+            case "down":
+                if (this.actionRepeatedCheck("down")) {
+                    actionEligible = false;
+                    break;
+                }
+                Wall = false;
+                Agent = false;
+
+                // check if neo can move up
+                if (neoInts[1] > 0) {
+                    // action is possible
+                    Wall = false;
+                } else {
+                    Wall = true;
+                }
+                for (int i = 1; i < agentsInts.length; i = i + 2) {
+                    int agentY = agentsInts[i];
+                    int agentX = agentsInts[i - 1];
+                    if (neoInts[1] - 1 == agentY && neoInts[0] == agentX) {
+                        Agent = true;
+                        break;
+                    }
+                }
+                for (int i = 0; i < hostagesInts.length; i += 3) {
+                    int hostageX = hostagesInts[i];
+                    int hostageY = hostagesInts[i + 1];
+                    int hostageDamage = hostagesInts[i + 2];
+                    if (neoInts[0] == hostageX && neoInts[1] - 1 == hostageY && hostageDamage >= 98) {
+                        Agent = true;
+                    }
+
+                }
+                prevented = Wall || Agent;
+                if (!prevented) {
+                    neoInts[1] = neoInts[1] - 1;
+                    for (int i = 0; i < neo.carriedHostagesIndex.size(); i++) {
+                        if (neo.carriedHostagesIndex.get(i).equals(true)) {
+                            hostagesInts[i * 3 + 1] = neoInts[1];
+                        }
+                    }
+                    newNeo = new Neo(this.neo, neoInts[0], neoInts[1], this.neo.carriedHostagesIndex, this.neo.damage,
+                            this.neo.carriedSoFar);
+                } else {
+                    actionEligible = false;
+                }
+
+                break;
+            case "left":
+
+                // System.out.println(Matrix.goalFoundNodes(this));
+                if (this.actionRepeatedCheck("left")) {
+                    actionEligible = false;
+                    break;
+                }
+                Wall = false;
+                Agent = false;
+
+                // check if neo can move left
+                if (neoInts[0] > 0) {
+                    // action is possible
+                    Wall = false;
+                } else {
+                    Wall = true;
+                }
                 for (int i = 0; i < agentsInts.length; i = i + 2) {
                     int agentX = agentsInts[i];
                     int agentY = agentsInts[i + 1];
-                    if ((neoInts[0] + 1 == agentX && neoInts[1] == agentY)) { // right
+                    if (neoInts[0] - 1 == agentX && neoInts[1] == agentY) {
                         Agent = true;
-                        Matrix.kills++;
-                        agentKilled = true;
-                        agentsInts = removeTheElement(agentsInts, i);
-                        agentsInts = removeTheElement(agentsInts, i);
-                        i -= 2;
-                    }
-                    if ((neoInts[0] - 1 == agentX && neoInts[1] == agentY)) { // left
-                        Agent = true;
-                        Matrix.kills++;
-                        agentKilled = true;
-                        agentsInts = removeTheElement(agentsInts, i);
-                        agentsInts = removeTheElement(agentsInts, i);
-                        i -= 2;
-                    }
-                    if ((neoInts[1] - 1 == agentY && neoInts[0] == agentX)) { // down
-                        Agent = true;
-                        Matrix.kills++;
-                        agentKilled = true;
-                        agentsInts = removeTheElement(agentsInts, i);
-                        agentsInts = removeTheElement(agentsInts, i);
-                        i -= 2;
-                    }
-                    if ((neoInts[1] + 1 == agentY && neoInts[0] == agentX)) { // up
-                        Agent = true;
-                        Matrix.kills++;
-                        agentKilled = true;
-                        agentsInts = removeTheElement(agentsInts, i);
-                        agentsInts = removeTheElement(agentsInts, i);
-                        i -= 2;
+                        break;
                     }
                 }
+                for (int i = 0; i < hostagesInts.length; i += 3) {
+                    int hostageX = hostagesInts[i];
+                    int hostageY = hostagesInts[i + 1];
+                    int hostageDamage = hostagesInts[i + 2];
+                    if (neoInts[0] - 1 == hostageX && neoInts[1] == hostageY && hostageDamage >= 98) {
+                        Agent = true;
+                    }
 
-            }
+                }
+                prevented = Wall || Agent;
+                if (!prevented) {
+                    neoInts[0] = neoInts[0] - 1;
+                    for (int i = 0; i < neo.carriedHostagesIndex.size(); i++) {
+                        if (neo.carriedHostagesIndex.get(i).equals(true)) {
+                            hostagesInts[i * 3] = neoInts[0];
+                        }
+                    }
+                    newNeo = new Neo(this.neo, neoInts[0], neoInts[1], this.neo.carriedHostagesIndex, this.neo.damage,
+                            this.neo.carriedSoFar);
+                } else {
+                    actionEligible = false;
+                }
+                break;
+            case "right":
+                if (this.actionRepeatedCheck("right")) {
+                    actionEligible = false;
+                    break;
+                }
+                Wall = false;
+                Agent = false;
 
-            if (agentKilled) {
+                // check if neo can move right
+                if (neoInts[0] < mapInts[1] - 1) {
+                    // action is possible
+                    Wall = false;
+                } else {
+                    Wall = true;
+                }
+                for (int i = 0; i < agentsInts.length; i = i + 2) {
+                    int agentX = agentsInts[i];
+                    int agentY = agentsInts[i + 1];
+                    if (neoInts[0] + 1 == agentX && agentY == neoInts[1]) {
+                        Agent = true;
+                        break;
+                    }
+                }
+                for (int i = 0; i < hostagesInts.length; i += 3) {
+                    int hostageX = hostagesInts[i];
+                    int hostageY = hostagesInts[i + 1];
+                    int hostageDamage = hostagesInts[i + 2];
+                    if (neoInts[0] + 1 == hostageX && neoInts[1] == hostageY && hostageDamage >= 98) {
+                        Agent = true;
+                    }
 
-                newNeo = new Neo(this.neo, neoInts[0], neoInts[1], this.neo.carriedHostagesIndex, this.neo.damage + 20,
-                        this.neo.carriedSoFar);
+                }
+                prevented = Wall || Agent;
+                if (!prevented) {
+                    neoInts[0] = neoInts[0] + 1;
+                    for (int i = 0; i < neo.carriedHostagesIndex.size(); i++) {
+                        if (neo.carriedHostagesIndex.get(i).equals(true)) {
+                            hostagesInts[i * 3] = neoInts[0];
+                        }
+                    }
+                    newNeo = new Neo(this.neo, neoInts[0], neoInts[1], this.neo.carriedHostagesIndex, this.neo.damage,
+                            this.neo.carriedSoFar);
+                } else {
+                    actionEligible = false;
+                }
 
-            } else {
-                actionEligible = false;
-            }
+                break;
+            case "kill":
+                Boolean agentKilled = false;
+                Agent = false;
+                // how can we kill?
 
-            break;
-        case "fly":
-            for (int i = 0; i < launchingPadsInts.length; i = i + 4) {
-                boolean launchingPadTaken = false;
-                int launchingPadOneX = hostagesInts[i];
-                int launchingPadOneY = hostagesInts[i + 1];
-                int launchingPadTwoX = hostagesInts[i + 2];
-                int launchingPadTwoY = hostagesInts[i + 3];
+                for (int i = 0; i < hostagesInts.length; i += 3) {
 
-                if (neoInts[0] == launchingPadOneX && neoInts[1] == launchingPadOneY) {
-                    launchingPadTaken = true;
-                    neoInts[0] = launchingPadTwoX;
-                    neoInts[1] = launchingPadTwoY;
-                    for (int j = 0; j < neo.carriedHostagesIndex.size(); j++) {
-                        if (neo.carriedHostagesIndex.get(j).equals(true)) {
-                            hostagesInts[j * 3 + 1] = neoInts[1];
-                            hostagesInts[j * 3] = neoInts[0];
+                    int hostageX = hostagesInts[i];
+                    int hostageY = hostagesInts[i + 1];
+                    int hostageDamage = hostagesInts[i + 2];
+
+                    if (neoInts[0] == hostageX && neoInts[1] == hostageY && hostageDamage >= 98) {
+                        actionEligible = false;
+                    }
+
+                }
+                if (neo.damage + 20 < 100 && actionEligible) {
+                    for (int i = 0; i < agentsInts.length; i = i + 2) {
+                        int agentX = agentsInts[i];
+                        int agentY = agentsInts[i + 1];
+                        if ((neoInts[0] + 1 == agentX && neoInts[1] == agentY)) { // right
+                            Agent = true;
+                            Matrix.kills++;
+                            agentKilled = true;
+                            agentsInts = removeTheElement(agentsInts, i);
+                            agentsInts = removeTheElement(agentsInts, i);
+                            i -= 2;
+                            removeFromTurnedToAgents(neoInts[0] + 1, neoInts[1]);
+                            this.agentsToMinus++;
+                        }
+                        if ((neoInts[0] - 1 == agentX && neoInts[1] == agentY)) { // left
+                            Agent = true;
+                            Matrix.kills++;
+                            agentKilled = true;
+                            agentsInts = removeTheElement(agentsInts, i);
+                            agentsInts = removeTheElement(agentsInts, i);
+                            i -= 2;
+                            removeFromTurnedToAgents(neoInts[0] - 1, neoInts[1]);
+                            this.agentsToMinus++;
+
+                        }
+                        if ((neoInts[1] - 1 == agentY && neoInts[0] == agentX)) { // down
+                            Agent = true;
+                            Matrix.kills++;
+                            agentKilled = true;
+                            agentsInts = removeTheElement(agentsInts, i);
+                            agentsInts = removeTheElement(agentsInts, i);
+                            i -= 2;
+                            removeFromTurnedToAgents(neoInts[0], neoInts[1] - 1);
+                            this.agentsToMinus++;
+
+                        }
+                        if ((neoInts[1] + 1 == agentY && neoInts[0] == agentX)) { // up
+                            Agent = true;
+                            Matrix.kills++;
+                            agentKilled = true;
+                            agentsInts = removeTheElement(agentsInts, i);
+                            agentsInts = removeTheElement(agentsInts, i);
+                            i -= 2;
+                            removeFromTurnedToAgents(neoInts[0], neoInts[1] + 1);
+                            this.agentsToMinus++;
 
                         }
                     }
 
-                } else {
+                }
 
-                    if (neoInts[0] == launchingPadTwoX && neoInts[1] == launchingPadTwoY) {
+                if (agentKilled) {
+
+                    newNeo = new Neo(this.neo, neoInts[0], neoInts[1], this.neo.carriedHostagesIndex,
+                            this.neo.damage + 20,
+                            this.neo.carriedSoFar);
+
+                } else {
+                    actionEligible = false;
+                }
+
+                break;
+            case "fly":
+                if (this.actionRepeatedCheck("fly")) {
+                    actionEligible = false;
+                    break;
+                }
+                for (int i = 0; i < launchingPadsInts.length; i = i + 4) {
+                    boolean launchingPadTaken = false;
+                    int launchingPadOneX = launchingPadsInts[i];
+                    int launchingPadOneY = launchingPadsInts[i + 1];
+                    int launchingPadTwoX = launchingPadsInts[i + 2];
+                    int launchingPadTwoY = launchingPadsInts[i + 3];
+
+                    if (neoInts[0] == launchingPadOneX && neoInts[1] == launchingPadOneY) {
                         launchingPadTaken = true;
-                        neoInts[0] = launchingPadOneX;
-                        neoInts[1] = launchingPadOneY;
+                        neoInts[0] = launchingPadTwoX;
+                        neoInts[1] = launchingPadTwoY;
                         for (int j = 0; j < neo.carriedHostagesIndex.size(); j++) {
                             if (neo.carriedHostagesIndex.get(j).equals(true)) {
                                 hostagesInts[j * 3 + 1] = neoInts[1];
@@ -412,106 +555,122 @@ public class Node {
 
                             }
                         }
+
+                    } else {
+
+                        if (neoInts[0] == launchingPadTwoX && neoInts[1] == launchingPadTwoY) {
+                            launchingPadTaken = true;
+                            neoInts[0] = launchingPadOneX;
+                            neoInts[1] = launchingPadOneY;
+                            for (int j = 0; j < neo.carriedHostagesIndex.size(); j++) {
+                                if (neo.carriedHostagesIndex.get(j).equals(true)) {
+                                    hostagesInts[j * 3 + 1] = neoInts[1];
+                                    hostagesInts[j * 3] = neoInts[0];
+
+                                }
+                            }
+                        }
+                    }
+
+                    if (launchingPadTaken) {
+                        newNeo = new Neo(this.neo, neoInts[0], neoInts[1], this.neo.carriedHostagesIndex,
+                                this.neo.damage,
+                                this.neo.carriedSoFar);
+                    } else {
+                        actionEligible = false;
+
+                    }
+
+                }
+
+                break;
+            case "carry":
+                boolean hasCarried = false;
+                ArrayList<Boolean> tempMaxCarriedHostageIndex = new ArrayList<Boolean>();
+                tempMaxCarriedHostageIndex = (ArrayList) (neo.carriedHostagesIndex).clone();
+                int tempCarriedSoFar = neo.carriedSoFar;
+                if (neo.carriedSoFar >= maxCarriedHostagesInts) {
+                    actionEligible = false;
+                    break;
+                }
+                for (int i = 0; i < hostagesInts.length; i = i + 3) {
+                    int hostageX = hostagesInts[i];
+                    int hostageY = hostagesInts[i + 1];
+                    if ((neoInts[0] == hostageX && neoInts[1] == hostageY)) {
+                        hasCarried = true;
+                        tempMaxCarriedHostageIndex.set(i / 3, true);
+                        tempCarriedSoFar++;
                     }
                 }
 
-                if (launchingPadTaken) {
-                    newNeo = new Neo(this.neo, neoInts[0], neoInts[1], this.neo.carriedHostagesIndex, this.neo.damage,
-                            this.neo.carriedSoFar);
+                if (hasCarried) {
+                    newNeo = new Neo(this.neo, neoInts[0], neoInts[1], tempMaxCarriedHostageIndex, this.neo.damage,
+                            tempCarriedSoFar);
                 } else {
                     actionEligible = false;
-
                 }
 
-            }
-
-            break;
-        case "carry":
-            boolean hasCarried = false;
-            ArrayList<Boolean> tempMaxCarriedHostageIndex = new ArrayList<Boolean>();
-            tempMaxCarriedHostageIndex = (ArrayList) (neo.carriedHostagesIndex).clone();
-            int tempCarriedSoFar = neo.carriedSoFar;
-            if (neo.carriedSoFar >= maxCarriedHostagesInts) {
-                actionEligible = false;
                 break;
-            }
-            for (int i = 0; i < hostagesInts.length; i = i + 3) {
-                int hostageX = hostagesInts[i];
-                int hostageY = hostagesInts[i + 1];
-                if ((neoInts[0] == hostageX && neoInts[1] == hostageY)) {
-                    hasCarried = true;
-                    tempMaxCarriedHostageIndex.set(i / 3, true);
-                    tempCarriedSoFar++;
-                }
-            }
+            case "takePill":
+                boolean tookPill = false;
+                for (int i = 0; i < pillsInts.length; i = i + 2) {
+                    int pillX = pillsInts[i];
+                    int pillY = pillsInts[i + 1];
+                    if ((neoInts[0] == pillX && neoInts[1] == pillY)) {
+                        pillsInts = removeTheElement(pillsInts, i);
+                        pillsInts = removeTheElement(pillsInts, i);
+                        i -= 2;
+                        tookPill = true;
+                        pillsToMinus++;
+                        for (int j = 0; j < hostagesInts.length; j = j + 3) {
+                            // heal all hostages
+                            if (!(hostagesInts[j + 2] >= 100))
+                                hostagesInts[j + 2] = hostagesInts[j + 2] - 20;
+                            if (hostagesInts[j + 2] < 0)
+                                hostagesInts[j + 2] = 0;
+                        }
+                        newNeo = new Neo(this.neo, neoInts[0], neoInts[1], this.neo.carriedHostagesIndex,
+                                this.neo.damage - 20, this.neo.carriedSoFar);
 
-            if (hasCarried) {
-                newNeo = new Neo(this.neo, neoInts[0], neoInts[1], tempMaxCarriedHostageIndex, this.neo.damage,
-                        tempCarriedSoFar);
-            } else {
-                actionEligible = false;
-            }
-
-            break;
-        case "takePill":
-            boolean tookPill = false;
-            for (int i = 0; i < pillsInts.length; i = i + 2) {
-                int pillX = pillsInts[i];
-                int pillY = pillsInts[i + 1];
-                if ((neoInts[0] == pillX && neoInts[1] == pillY)) {
-                    pillsInts = removeTheElement(pillsInts, i);
-                    pillsInts = removeTheElement(pillsInts, i);
-                    i -= 2;
-                    tookPill = true;
-                    for (int j = 0; j < hostagesInts.length; j = j + 3) {
-                        // heal all hostages
-                        if (!(hostagesInts[j + 2] >= 100))
-                            hostagesInts[j + 2] = hostagesInts[j + 2] - 20;
-                        if (hostagesInts[j + 2] < 0)
-                            hostagesInts[j + 2] = 0;
-                    }
-                    newNeo = new Neo(this.neo, neoInts[0], neoInts[1], this.neo.carriedHostagesIndex,
-                            this.neo.damage - 20, this.neo.carriedSoFar);
-
-                }
-            }
-
-            if (!tookPill) {
-                actionEligible = false;
-            }
-
-            break;
-        case "drop":
-
-            int teleboothX = teleboothInts[0];
-            int teleboothY = teleboothInts[1];
-            ArrayList<Boolean> tempMaxCarriedHostageIndex1 = new ArrayList<Boolean>();
-            tempMaxCarriedHostageIndex1 = (ArrayList) (neo.carriedHostagesIndex).clone();
-            int tempCarriedSoFar1 = neo.carriedSoFar;
-            if (tempCarriedSoFar1 == 0) {
-                actionEligible = false;
-            }
-            if ((neoInts[0] == teleboothX && neoInts[1] == teleboothY) && actionEligible) { // right
-
-                for (int i = 0; i < neo.carriedHostagesIndex.size(); i++) {
-                    if (neo.carriedHostagesIndex.get(i).equals(true)) {
-                        tempMaxCarriedHostageIndex1.set(i, false);
-                        tempCarriedSoFar1--;
-                        hostagesInts[i * 3] = teleboothX;
-                        hostagesInts[i * 3 + 1] = teleboothY;
                     }
                 }
-                newNeo = new Neo(this.neo, neoInts[0], neoInts[1], tempMaxCarriedHostageIndex1, this.neo.damage,
-                        tempCarriedSoFar1);
-            } else {
-                actionEligible = false;
-            }
 
-            break;
+                if (!tookPill) {
+                    actionEligible = false;
+                }
 
-        default:
-            System.out.println("defaulted the case");
-            break;
+                break;
+            case "drop":
+
+                int teleboothX = teleboothInts[0];
+                int teleboothY = teleboothInts[1];
+                ArrayList<Boolean> tempMaxCarriedHostageIndex1 = new ArrayList<Boolean>();
+                tempMaxCarriedHostageIndex1 = (ArrayList) (neo.carriedHostagesIndex).clone();
+                int tempCarriedSoFar1 = neo.carriedSoFar;
+                if (tempCarriedSoFar1 == 0) {
+                    actionEligible = false;
+                }
+                if ((neoInts[0] == teleboothX && neoInts[1] == teleboothY) && actionEligible) { // right
+
+                    for (int i = 0; i < neo.carriedHostagesIndex.size(); i++) {
+                        if (neo.carriedHostagesIndex.get(i).equals(true)) {
+                            tempMaxCarriedHostageIndex1.set(i, false);
+                            tempCarriedSoFar1--;
+                            hostagesInts[i * 3] = teleboothX;
+                            hostagesInts[(i * 3) + 1] = teleboothY;
+                        }
+                    }
+                    newNeo = new Neo(this.neo, neoInts[0], neoInts[1], tempMaxCarriedHostageIndex1, this.neo.damage,
+                            tempCarriedSoFar1);
+                } else {
+                    actionEligible = false;
+                }
+
+                break;
+
+            default:
+                System.out.println("defaulted the case");
+                break;
         }
 
         // TIME TICK
@@ -522,7 +681,7 @@ public class Node {
                 if ((teleboothInts[0] != hostageX || teleboothInts[1] != hostageY) && hostagesInts[i + 2] < 100) {
                     hostagesInts[i + 2] += 2;
                     if (hostagesInts[i + 2] >= 100) {
-
+                        Matrix.deaths++;
                         hostagesInts[i + 2] = 100;
                         boolean carriedByNeo = false;
 
@@ -533,6 +692,8 @@ public class Node {
 
                         }
                         if (!carriedByNeo) {
+                            this.hostagesToMinus++;
+                            this.agentsToMinus--;
                             int newAgentInts[] = new int[agentsInts.length + 2];
                             for (int j = 0; j < agentsInts.length; j++) {
                                 newAgentInts[j] = agentsInts[j];
@@ -540,20 +701,22 @@ public class Node {
                             newAgentInts[agentsInts.length] = hostageX;
                             newAgentInts[agentsInts.length + 1] = hostageY;
                             agentsInts = newAgentInts;
+                            Matrix.turnedToAgents.add(hostageX);
+                            Matrix.turnedToAgents.add(hostageY);
 
                             // REMOVE HOSTAGE FROM ARRAY
                             hostagesInts[i] = -99;
                             hostagesInts[i + 1] = -99;
                             hostagesInts[i + 2] = -99;
                             int newHostageInts[] = new int[hostagesInts.length - 3];
-                            int k = 0;
+                            int h = 0;
                             for (int j = 0; j < hostagesInts.length; j += 3) {
-                                if (hostagesInts[j] != -99 && k < newHostageInts.length) {
+                                if (hostagesInts[j] != -99 && h < newHostageInts.length) {
 
-                                    newHostageInts[k] = hostagesInts[j];
-                                    newHostageInts[k + 1] = hostagesInts[j + 1];
-                                    newHostageInts[k + 2] = hostagesInts[j + 2];
-                                    k += 3;
+                                    newHostageInts[h] = hostagesInts[j];
+                                    newHostageInts[h + 1] = hostagesInts[j + 1];
+                                    newHostageInts[h + 2] = hostagesInts[j + 2];
+                                    h += 3;
                                 } else {
                                     i -= 3;
                                 }
@@ -625,7 +788,16 @@ public class Node {
             }
 
             Matrix.stateHash.put(accumilativeString, 1);
-            return new Node(accumilativeString, this.accumilativeCost, this, newNeo);
+
+            // System.out.println("ACTION: " + action);
+            // System.out.println("New State: " + accumilativeString);
+            // System.out.println(
+            // "Pills Before: " + this.numberOfPills + " Pills After: " +
+            // (this.numberOfPills - pillsToMinus));
+
+            return new Node(accumilativeString, this.accumilativeCost, this, newNeo,
+                    this.numberOfAgents - this.agentsToMinus,
+                    this.numberOfHostages - this.hostagesToMinus, this.numberOfPills - this.pillsToMinus);
         } else {
 
             return null;

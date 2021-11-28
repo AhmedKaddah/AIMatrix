@@ -1,5 +1,10 @@
+import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Hashtable;
+import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Random;
 
 public class Matrix {
@@ -14,155 +19,168 @@ public class Matrix {
 	public static int kills;
 	public static int nodes;
 	public static int deaths;
+	public static int numberOfExpanded;
 
 	public static Hashtable<String, Integer> stateHash;
 
+	public static ArrayList<Integer> turnedToAgents = new ArrayList<Integer>();
+
 	public static String genGrid() {
-		String stringifiedGrid = "";
-		Random rn = new Random();
-		gridSize = rn.nextInt(11) + 5;
-		map = new Tile[gridSize][gridSize];
-		// Generate empty grid
-		for (int i = 0; i < gridSize; i++) {
-			for (int j = 0; j < gridSize; j++) {
-				map[i][j] = new Tile();
-			}
-		}
+		// String stringifiedGrid = "";
+		// Random rn = new Random();
+		// gridSize = rn.nextInt(11) + 5;
+		// map = new Tile[gridSize][gridSize];
+		// // Generate empty grid
+		// for (int i = 0; i < gridSize; i++) {
+		// for (int j = 0; j < gridSize; j++) {
+		// map[i][j] = new Tile();
+		// }
+		// }
 
-		// Generating random numbers
-		int randTeleBooth = rn.nextInt(gridSize * gridSize);
-		randHostages = rn.nextInt(8) + 3;
-		randAgents = rn.nextInt((int) (gridSize * gridSize / 4)) + 1;
-		randPills = rn.nextInt(randHostages) + 1;
-		randLaunchingPads = rn.nextInt((int) (randHostages / 3)) + 1;
+		// // Generating random numbers
+		// int randTeleBooth = rn.nextInt(gridSize * gridSize);
+		// randHostages = rn.nextInt(8) + 3;
+		// randAgents = rn.nextInt((int) (gridSize * gridSize / 4)) + 1;
+		// randPills = rn.nextInt(randHostages) + 1;
+		// randLaunchingPads = rn.nextInt((int) (randHostages / 3)) + 1;
 
-		stringifiedGrid += gridSize + "," + gridSize + ";";
+		// stringifiedGrid += gridSize + "," + gridSize + ";";
 
-		// Populate TeleBooth
-		TeleBooth = new TeleBooth(randTeleBooth / gridSize, randTeleBooth % gridSize);
-		map[randTeleBooth / gridSize][randTeleBooth % gridSize].occupant = TeleBooth;
-		map[randTeleBooth / gridSize][randTeleBooth % gridSize].isEmpty = false;
+		// // Populate TeleBooth
+		// TeleBooth = new TeleBooth(randTeleBooth / gridSize, randTeleBooth %
+		// gridSize);
+		// map[randTeleBooth / gridSize][randTeleBooth % gridSize].occupant = TeleBooth;
+		// map[randTeleBooth / gridSize][randTeleBooth % gridSize].isEmpty = false;
 
-		// Neo's Position
-		for (int i = 0; i < 1; i++) {
+		// // Neo's Position
+		// for (int i = 0; i < 1; i++) {
 
-			int mapPosition = rn.nextInt(gridSize * gridSize);
-			if (map[mapPosition / gridSize][mapPosition % gridSize].isEmpty) {
-				Neo = new Neo(mapPosition / gridSize, mapPosition % gridSize, randHostages);
-				map[mapPosition / gridSize][mapPosition % gridSize].hasNeo = true;
-				map[mapPosition / gridSize][mapPosition % gridSize].isEmpty = false;
-			} else {
-				i--;
-			}
+		// int mapPosition = rn.nextInt(gridSize * gridSize);
+		// if (map[mapPosition / gridSize][mapPosition % gridSize].isEmpty) {
+		// Neo = new Neo(mapPosition / gridSize, mapPosition % gridSize, randHostages);
+		// map[mapPosition / gridSize][mapPosition % gridSize].hasNeo = true;
+		// map[mapPosition / gridSize][mapPosition % gridSize].isEmpty = false;
+		// } else {
+		// i--;
+		// }
 
-		}
+		// }
 
-		stringifiedGrid += Neo.maxCarriedHostages + ";" + Neo.x + "," + Neo.y + ";";
+		// stringifiedGrid += Neo.maxCarriedHostages + ";" + Neo.x + "," + Neo.y + ";";
 
-		stringifiedGrid += TeleBooth.x + "," + TeleBooth.y + ";";
+		// stringifiedGrid += TeleBooth.x + "," + TeleBooth.y + ";";
 
-		// Populate Agents
-		for (int i = 0; i < randAgents; i++) {
-			int mapPosition = rn.nextInt(gridSize * gridSize);
-			if (map[mapPosition / gridSize][mapPosition % gridSize].isEmpty) {
-				map[mapPosition / gridSize][mapPosition % gridSize].occupant = new Agent(mapPosition / gridSize,
-						mapPosition % gridSize);
-				map[mapPosition / gridSize][mapPosition % gridSize].isEmpty = false;
-				stringifiedGrid += mapPosition / gridSize + "," + mapPosition % gridSize + ",";
-			} else {
-				i--;
-			}
+		// // Populate Agents
+		// for (int i = 0; i < randAgents; i++) {
+		// int mapPosition = rn.nextInt(gridSize * gridSize);
+		// if (map[mapPosition / gridSize][mapPosition % gridSize].isEmpty) {
+		// map[mapPosition / gridSize][mapPosition % gridSize].occupant = new
+		// Agent(mapPosition / gridSize,
+		// mapPosition % gridSize);
+		// map[mapPosition / gridSize][mapPosition % gridSize].isEmpty = false;
+		// stringifiedGrid += mapPosition / gridSize + "," + mapPosition % gridSize +
+		// ",";
+		// } else {
+		// i--;
+		// }
 
-		}
+		// }
 
-		// initialize hostages index in neo.
+		// // initialize hostages index in neo.
 
-		for (int i = 0; i < randHostages; i++) {
-			Neo.carriedHostagesIndex.add(false);
+		// for (int i = 0; i < randHostages; i++) {
+		// Neo.carriedHostagesIndex.add(false);
 
-		}
+		// }
 
-		stringifiedGrid = stringifiedGrid.substring(0, stringifiedGrid.length() - 1);
-		stringifiedGrid += ";";
+		// stringifiedGrid = stringifiedGrid.substring(0, stringifiedGrid.length() - 1);
+		// stringifiedGrid += ";";
 
-		// Populate Pills
-		for (int i = 0; i < randPills; i++) {
-			int mapPosition = rn.nextInt(gridSize * gridSize);
-			if (map[mapPosition / gridSize][mapPosition % gridSize].isEmpty) {
-				map[mapPosition / gridSize][mapPosition % gridSize].occupant = new Pill(mapPosition / gridSize,
-						mapPosition % gridSize);
-				map[mapPosition / gridSize][mapPosition % gridSize].isEmpty = false;
-				stringifiedGrid += mapPosition / gridSize + "," + mapPosition % gridSize + ",";
+		// // Populate Pills
+		// for (int i = 0; i < randPills; i++) {
+		// int mapPosition = rn.nextInt(gridSize * gridSize);
+		// if (map[mapPosition / gridSize][mapPosition % gridSize].isEmpty) {
+		// map[mapPosition / gridSize][mapPosition % gridSize].occupant = new
+		// Pill(mapPosition / gridSize,
+		// mapPosition % gridSize);
+		// map[mapPosition / gridSize][mapPosition % gridSize].isEmpty = false;
+		// stringifiedGrid += mapPosition / gridSize + "," + mapPosition % gridSize +
+		// ",";
 
-			} else {
-				i--;
-			}
+		// } else {
+		// i--;
+		// }
 
-		}
+		// }
 
-		stringifiedGrid = stringifiedGrid.substring(0, stringifiedGrid.length() - 1);
-		stringifiedGrid += ";";
+		// stringifiedGrid = stringifiedGrid.substring(0, stringifiedGrid.length() - 1);
+		// stringifiedGrid += ";";
 
-		// Populate LaunchingPads
-		for (int i = 0; i < randLaunchingPads; i++) {
-			LaunchingPad l1;
-			LaunchingPad l2;
+		// // Populate LaunchingPads
+		// for (int i = 0; i < randLaunchingPads; i++) {
+		// LaunchingPad l1;
+		// LaunchingPad l2;
 
-			int mapPosition = rn.nextInt(gridSize * gridSize);
-			if (map[mapPosition / gridSize][mapPosition % gridSize].isEmpty) {
+		// int mapPosition = rn.nextInt(gridSize * gridSize);
+		// if (map[mapPosition / gridSize][mapPosition % gridSize].isEmpty) {
 
-				l1 = new LaunchingPad(mapPosition / gridSize, mapPosition % gridSize);
+		// l1 = new LaunchingPad(mapPosition / gridSize, mapPosition % gridSize);
 
-				int mapPosition2 = rn.nextInt(gridSize * gridSize);
-				if (map[mapPosition2 / gridSize][mapPosition2 % gridSize].isEmpty) {
+		// int mapPosition2 = rn.nextInt(gridSize * gridSize);
+		// if (map[mapPosition2 / gridSize][mapPosition2 % gridSize].isEmpty) {
 
-					l2 = new LaunchingPad(mapPosition2 / gridSize, mapPosition2 % gridSize);
-					l1.connectedLP = l2;
-					l2.connectedLP = l1;
+		// l2 = new LaunchingPad(mapPosition2 / gridSize, mapPosition2 % gridSize);
+		// l1.connectedLP = l2;
+		// l2.connectedLP = l1;
 
-					map[mapPosition / gridSize][mapPosition % gridSize].occupant = l1;
-					map[mapPosition / gridSize][mapPosition % gridSize].isEmpty = false;
+		// map[mapPosition / gridSize][mapPosition % gridSize].occupant = l1;
+		// map[mapPosition / gridSize][mapPosition % gridSize].isEmpty = false;
 
-					map[mapPosition2 / gridSize][mapPosition2 % gridSize].occupant = l2;
-					map[mapPosition2 / gridSize][mapPosition2 % gridSize].isEmpty = false;
+		// map[mapPosition2 / gridSize][mapPosition2 % gridSize].occupant = l2;
+		// map[mapPosition2 / gridSize][mapPosition2 % gridSize].isEmpty = false;
 
-					stringifiedGrid += mapPosition / gridSize + "," + mapPosition % gridSize + ",";
-					stringifiedGrid += mapPosition2 / gridSize + "," + mapPosition2 % gridSize + ",";
+		// stringifiedGrid += mapPosition / gridSize + "," + mapPosition % gridSize +
+		// ",";
+		// stringifiedGrid += mapPosition2 / gridSize + "," + mapPosition2 % gridSize +
+		// ",";
 
-				} else {
-					i--;
-				}
+		// } else {
+		// i--;
+		// }
 
-			} else {
-				i--;
-			}
+		// } else {
+		// i--;
+		// }
 
-		}
-		stringifiedGrid = stringifiedGrid.substring(0, stringifiedGrid.length() - 1);
-		stringifiedGrid += ";";
+		// }
+		// stringifiedGrid = stringifiedGrid.substring(0, stringifiedGrid.length() - 1);
+		// stringifiedGrid += ";";
 
-		// Populate Hostages
+		// // Populate Hostages
 
-		for (int i = 0; i < randHostages; i++) {
+		// for (int i = 0; i < randHostages; i++) {
 
-			int mapPosition = rn.nextInt(gridSize * gridSize);
-			Hostage tempHostage = new Hostage(mapPosition / gridSize, mapPosition % gridSize);
-			if (map[mapPosition / gridSize][mapPosition % gridSize].isEmpty) {
-				map[mapPosition / gridSize][mapPosition % gridSize].occupant = tempHostage;
-				map[mapPosition / gridSize][mapPosition % gridSize].isEmpty = false;
-				stringifiedGrid += mapPosition / gridSize + "," + mapPosition % gridSize + "," + tempHostage.damage
-						+ ",";
+		// int mapPosition = rn.nextInt(gridSize * gridSize);
+		// Hostage tempHostage = new Hostage(mapPosition / gridSize, mapPosition %
+		// gridSize);
+		// if (map[mapPosition / gridSize][mapPosition % gridSize].isEmpty) {
+		// map[mapPosition / gridSize][mapPosition % gridSize].occupant = tempHostage;
+		// map[mapPosition / gridSize][mapPosition % gridSize].isEmpty = false;
+		// stringifiedGrid += mapPosition / gridSize + "," + mapPosition % gridSize +
+		// "," + tempHostage.damage
+		// + ",";
 
-			} else {
-				i--;
-			}
+		// } else {
+		// i--;
+		// }
 
-		}
-		stringifiedGrid = stringifiedGrid.substring(0, stringifiedGrid.length() - 1);
+		// }
+		// stringifiedGrid = stringifiedGrid.substring(0, stringifiedGrid.length() - 1);
 
-		System.out.println(Arrays.deepToString(map).replace("], ", "]\n"));
-		System.out.println(stringifiedGrid);
-		return (stringifiedGrid);
+		// System.out.println(Arrays.deepToString(map).replace("], ", "]\n"));
+		// System.out.println(stringifiedGrid);
+		// return (stringifiedGrid);
+		return "";
 	}
 
 	public static void stringToGrid(String stringGrid) {
@@ -215,8 +233,7 @@ public class Matrix {
 				map[i][j] = new Tile();
 			}
 		}
-		Neo = new Neo(neoInts[0], neoInts[1], hostagesInts.length / 3);
-		Neo.maxCarriedHostages = maxCarriedHostagesInts;
+		Neo = new Neo(neoInts[0], neoInts[1], hostagesInts.length / 3, maxCarriedHostagesInts);
 		map[Neo.x][Neo.y].hasNeo = true;
 		TeleBooth = new TeleBooth(teleboothInts[0], teleboothInts[1]);
 		map[TeleBooth.x][TeleBooth.y].occupant = TeleBooth;
@@ -244,24 +261,182 @@ public class Matrix {
 
 	}
 
-	public String solve() {
+	public static String solve(String stringGrid, String algorithm) {
+		String splitString[] = stringGrid.split(";");
+		String neoString[] = splitString[2].split(",");
+		String maxCarriedHostagesString = splitString[1];
+		String agentsString[] = splitString[4].split(",");
+		String pillsString[] = splitString[5].split(",");
+		String hostagesString[] = splitString[7].split(",");
 
+		stateHash = new Hashtable<String, Integer>();
+
+		int[] neoInts = new int[neoString.length];
+		for (int i = 0; i < neoString.length; i++) {
+			neoInts[i] = Integer.parseInt(neoString[i]);
+		}
+		int[] agentsInts = new int[agentsString.length];
+		for (int i = 0; i < agentsString.length; i++) {
+			agentsInts[i] = Integer.parseInt(agentsString[i]);
+		}
+		int[] pillsInts = new int[pillsString.length];
+		for (int i = 0; i < pillsString.length; i++) {
+			pillsInts[i] = Integer.parseInt(pillsString[i]);
+		}
+
+		int[] hostagesInts = new int[hostagesString.length];
+		for (int i = 0; i < hostagesString.length; i++) {
+			hostagesInts[i] = Integer.parseInt(hostagesString[i]);
+
+		}
+		int maxCarriedHostagesInts = Integer.parseInt(maxCarriedHostagesString);
+
+		Neo tempNeo = new Neo(neoInts[0], neoInts[1], hostagesInts.length / 3, maxCarriedHostagesInts);
+		Node s0 = new Node(stringGrid, 0, null, tempNeo, agentsInts.length / 2, hostagesInts.length / 3,
+				pillsInts.length / 2);
+
+		switch (algorithm) {
+			case "BF":
+				return BreadthFirst(s0);
+
+		}
 		return "";
 	}
+
+	public static String goalFoundNodes(Node x) {
+		if (x.parent == null) {
+			return "";
+		}
+		if (x.parent.up != null && x.parent.up.equals(x)) {
+			return goalFoundNodes(x.parent) + "," + "up";
+		}
+		if (x.parent.down != null && x.parent.down.equals(x)) {
+			return goalFoundNodes(x.parent) + "," + "down";
+		}
+		if (x.parent.left != null && x.parent.left.equals(x)) {
+			return goalFoundNodes(x.parent) + "," + "left";
+		}
+		if (x.parent.right != null && x.parent.right.equals(x)) {
+			return goalFoundNodes(x.parent) + "," + "right";
+		}
+		if (x.parent.kill != null && x.parent.kill.equals(x)) {
+			return goalFoundNodes(x.parent) + "," + "kill";
+		}
+		if (x.parent.fly != null && x.parent.fly.equals(x)) {
+			return goalFoundNodes(x.parent) + "," + "fly";
+		}
+		if (x.parent.carry != null && x.parent.carry.equals(x)) {
+			return goalFoundNodes(x.parent) + "," + "carry";
+		}
+		if (x.parent.takePill != null && x.parent.takePill.equals(x)) {
+			return goalFoundNodes(x.parent) + "," + "takePill";
+		}
+		if (x.parent.drop != null && x.parent.drop.equals(x)) {
+			return goalFoundNodes(x.parent) + "," + "drop";
+		}
+		return "";
+
+	}
+
+	public static String goalFound(Node x) {
+		return goalFoundNodes(x).substring(1) + ";" + Matrix.deaths + ";" + Matrix.kills + ";"
+				+ Matrix.numberOfExpanded;
+	}
+
+	public static String BreadthFirst(Node S0) {
+		int numberOfExpansions = 0;
+		PriorityQueue<Map.Entry<Node, Integer>> queue = new PriorityQueue<>(
+				Map.Entry.comparingByValue());
+		queue.offer(new AbstractMap.SimpleEntry<>(S0, numberOfExpansions++));
+
+		while (queue.size() > 0) {
+			Node dequeuedNode = queue.poll().getKey();
+			dequeuedNode.expandNode();
+			if (dequeuedNode.isGoal) {
+				// Matrix.deaths = 0;
+				// Matrix.kills = 0;
+				// Matrix.numberOfExpanded = 0;
+				return goalFound(dequeuedNode);
+			}
+			if (dequeuedNode.left != null) {
+				queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.left, numberOfExpansions++));
+			}
+			if (dequeuedNode.right != null) {
+				queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.right, numberOfExpansions++));
+			}
+			if (dequeuedNode.up != null) {
+				queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.up, numberOfExpansions++));
+			}
+			if (dequeuedNode.down != null) {
+				queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.down, numberOfExpansions++));
+			}
+			if (dequeuedNode.carry != null) {
+				queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.carry, numberOfExpansions++));
+			}
+			if (dequeuedNode.fly != null) {
+				queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.fly, numberOfExpansions++));
+			}
+			if (dequeuedNode.takePill != null) {
+				queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.takePill, numberOfExpansions++));
+			}
+			if (dequeuedNode.kill != null) {
+				queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.kill, numberOfExpansions++));
+			}
+			if (dequeuedNode.drop != null) {
+				queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.drop, numberOfExpansions++));
+			}
+		}
+
+		return "No Goal Found";
+
+	}
+
+	// public static String BreadthFirst() {
+	// public static ArrayList<Integer> turnedToAgents = new ArrayList<Integer>();
+
+	// return "";
+	// }
 
 	public static void main(String[] args) {
 		// stringToGrid("5,5;3;2,4;0,4;0,0,4,1;3,3,3,2;2,0,4,3;0,3,1,4,2,16,2,1,35,3,4,63,2,3,7,4,0,92,4,4,19");
 		// genGrid();
-		Neo tempNeo = new Neo(2, 4, 7);
-		tempNeo.maxCarriedHostages = 3;
-		Node s0 = new Node("5,5;3;2,4;0,4;0,0,4,4;2,4,3,2;2,0,4,3;0,3,1,4,2,16,2,1,35,3,4,63,2,3,7,3,4,97,4,4,19", 0,
-				null, tempNeo);
-		stateHash = new Hashtable<String, Integer>();
-		s0.expandNode();
-		System.out.println(s0.state);
-		s0.right.expandNode();
-		s0.down.expandNode();
-		System.out.println(s0.down.up.state);
+		String result = solve("5,5;2;0,4;1,4;0,1,1,1,2,1,3,1,3,3,3,4;1,0,2,4;0,3,4,3,4,3,0,3;0,0,30,3,0,80,4,4,80",
+				"BF");
+		System.out.println(result);
+		// System.out.println(BreadthFirst(s0));
+
+		// stateHash = new Hashtable<String, Integer>();
+		// Neo tempneo = new Neo(0, 4, 3, 2);
+		// Node s0 = new
+		// Node("5,5;2;0,4;1,4;0,1,1,1,2,1,3,1,3,3,3,4;0,4,2,4;0,3,4,3,4,3,0,3;0,0,30,3,0,80,4,4,80",
+		// 0, null, tempneo, 6, 3, 2);
+		// s0.expandNode();
+		// s0.takePill.expandNode();
+		// s0.takePill.right.expandNode();
+		// s0.takePill.right.right.expandNode();
+		// s0.takePill.right.right.kill.expandNode();
+		// System.out.println(s0.state);
+		// System.out.println(s0.numberOfPills);
+		// System.out.println(s0.takePill.state);
+		// System.out.println(s0.takePill.numberOfPills);
+		// System.out.println(s0.takePill.right.state);
+		// System.out.println(s0.takePill.right.numberOfPills);
+		// System.out.println(s0.takePill.right.right.state);
+		// System.out.println(s0.takePill.right.right.numberOfPills);
+		// System.out.println(s0.takePill.right.right.kill.state);
+		// System.out.println(s0.takePill.right.right.kill.numberOfPills);
+		// System.out.println(s0.takePill.numberOfPills);
+		// System.out.println(s0.takePill.right.numberOfPills);
+
+		// s0.expandNode();
+		// s0.right.expandNode();
+		// s0.right.kill.expandNode();
+		// System.out.println(s0.right.kill.state);
+
+		// System.out.println(goalFoundNodes(s0.right.kill.down));
+
+		// s0.down.expandNode();
+		// System.out.println(s0.right.left.state);
 		// s0.down.right.right.expandNode();
 		// up.right.carry.expandNode();
 		// s0.right.carry.right.expandNode();

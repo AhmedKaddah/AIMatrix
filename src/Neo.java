@@ -7,10 +7,10 @@ public class Neo extends Occupant {
     public ArrayList<Boolean> carriedHostagesIndex = new ArrayList<Boolean>();
     public int carriedSoFar;
 
-    public Neo(int x, int y, int numberOfHostages) {
+    public Neo(int x, int y, int numberOfHostages, int maxCarriedHostages) {
         super(x, y);
         Random rn = new Random();
-        maxCarriedHostages = rn.nextInt(4) + 1;
+        this.maxCarriedHostages = maxCarriedHostages;
         damage = 0;
         this.carriedSoFar = 0;
 
