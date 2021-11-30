@@ -1,3 +1,5 @@
+package code;
+
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -259,7 +261,7 @@ public class Matrix {
 
 	}
 
-	public static String solve(String stringGrid, String algorithm) {
+	public static String solve(String stringGrid, String algorithm, boolean visualize) {
 		String splitString[] = stringGrid.split(";");
 		String neoString[] = splitString[2].split(",");
 		String maxCarriedHostagesString = splitString[1];
@@ -291,7 +293,7 @@ public class Matrix {
 
 		Neo tempNeo = new Neo(neoInts[0], neoInts[1], hostagesInts.length / 3, maxCarriedHostagesInts);
 		Node s0 = new Node(stringGrid, 0, null, tempNeo, agentsInts.length / 2, hostagesInts.length / 3,
-				pillsInts.length / 2);
+				pillsInts.length / 2, 0, 0);
 
 		switch (algorithm) {
 			case "BF":
@@ -337,7 +339,7 @@ public class Matrix {
 	}
 
 	public static String goalFound(Node x) {
-		return goalFoundNodes(x).substring(1) + ";" + Matrix.deaths + ";" + Matrix.kills + ";"
+		return goalFoundNodes(x).substring(1) + ";" + x.deaths + ";" + x.kills + ";"
 				+ Matrix.numberOfExpanded;
 	}
 
@@ -351,9 +353,6 @@ public class Matrix {
 			Node dequeuedNode = queue.poll().getKey();
 			dequeuedNode.expandNode();
 			if (dequeuedNode.isGoal) {
-				// Matrix.deaths = 0;
-				// Matrix.kills = 0;
-				// Matrix.numberOfExpanded = 0;
 				return goalFound(dequeuedNode);
 			}
 			if (dequeuedNode.left != null) {
@@ -385,7 +384,7 @@ public class Matrix {
 			}
 		}
 
-		return "No Goal Found";
+		return "No Solution";
 
 	}
 
@@ -401,70 +400,70 @@ public class Matrix {
 		// String result =
 		// solve("5,5;2;3,4;1,2;0,3,1,4;2,3;4,4,0,2,0,2,4,4;2,2,91,2,4,62",
 		// "BF");
-		String result = solve("5,5;2;3,4;1,2;0,3,1,4;2,3;0,2,4,4;2,2,91,2,4,62",
-				"BF");
+		String result = solve(
+				"5,5;2;3,2;0,1;4,1;0,3;1,2,4,2,4,2,1,2,0,4,3,0,3,0,0,4;1,1,77,3,4,34",
+				"BF", true);
 		System.out.println(result);
 		// System.out.println(BreadthFirst(s0));
 
 		// stateHash = new Hashtable<String, Integer>();
-		// Neo tempneo = new Neo(3, 4, 2, 2);
-		// Node s0 = new Node("5,5;2;3,4;1,2;0,3,1,4;2,3;0,2,4,4;2,2,91,2,4,62",
-		// 0, null, tempneo, 2, 2, 1);
+		// Neo tempneo = new Neo(1, 4, 2, 1);
+		// Node s0 = new Node(
+		// "5,5;1;1,4;1,0;0,4;0,0,2,2;3,4,4,2,4,2,3,4;0,2,32,0,1,38",
+		// 0, null, tempneo, 1, 2, 2, 0, 0);
 		// s0.expandNode();
 		// s0.left.expandNode();
-		// s0.left.carry.expandNode();
-		// s0.left.carry.down.expandNode();
-		// s0.left.carry.down.takePill.expandNode();
-		// s0.left.carry.down.takePill.left.expandNode();
-		// s0.left.carry.down.takePill.left.down.expandNode();
-		// s0.left.carry.down.takePill.left.down.left.expandNode();
-		// s0.left.carry.down.takePill.left.down.left.fly.expandNode();
-		// s0.left.carry.down.takePill.left.down.left.fly.left.expandNode();
-		// s0.left.carry.down.takePill.left.down.left.fly.left.left.expandNode();
-		// s0.left.carry.down.takePill.left.down.left.fly.left.left.kill.expandNode();
-		// s0.left.carry.down.takePill.left.down.left.fly.left.left.kill.left.expandNode();
-		// s0.left.carry.down.takePill.left.down.left.fly.left.left.kill.left.down.expandNode();
-		// s0.left.carry.down.takePill.left.down.left.fly.left.left.kill.left.down.down.expandNode();
-		// System.out.println();
-		// System.out.println(s0.left.carry.down.takePill.state);
-		// System.out.println(s0.left.carry.down.down.carry..);
-		// System.out.println(s0.state);
-		// System.out.println(s0.numberOfPills);
-		// System.out.println(s0.takePill.state);
-		// System.out.println(s0.takePill.numberOfPills);
-		// System.out.println(s0.takePill.right.state);
-		// System.out.println(s0.takePill.right.numberOfPills);
-		// System.out.println(s0.takePill.right.right.state);
-		// System.out.println(s0.takePill.right.right.numberOfPills);
-		// System.out.println(s0.takePill.right.right.kill.state);
-		// System.out.println(s0.takePill.right.right.kill.numberOfPills);
-		// System.out.println(s0.takePill.numberOfPills);
-		// System.out.println(s0.takePill.right.numberOfPills);
-
-		// s0.expandNode();
-		// s0.right.expandNode();
-		// s0.right.kill.expandNode();
-		// System.out.println(s0.right.kill.state);
-
-		// System.out.println(goalFoundNodes(s0.right.kill.down));
-
-		// s0.down.expandNode();
-		// System.out.println(s0.right.left.state);
-		// s0.down.right.right.expandNode();
-		// up.right.carry.expandNode();
-		// s0.right.carry.right.expandNode();
-		// s0.right.expandNode();
 		// s0.left.left.expandNode();
-		// s0.left.left.down.expandNode();
-		// System.out.println(s0.right.state);
-		// System.out.println(s0.right.carry.state);
-		// System.out.println(s0.right.carry.down.state);
+		// s0.left.left.up.expandNode();
+		// s0.left.left.up.carry.expandNode();
+		// s0.left.left.up.carry.left.expandNode();
+		// s0.left.left.up.carry.left.down.expandNode();
+		// s0.left.left.up.carry.left.down.left.expandNode();
+		// s0.left.left.up.carry.left.down.left.drop.expandNode();
+		// s0.left.left.up.carry.left.down.left.drop.right.expandNode();
+		// s0.left.left.up.carry.left.down.left.drop.right.up.expandNode();
+		// s0.left.left.up.carry.left.down.left.drop.right.up.carry.expandNode();
+		// s0.left.left.up.carry.left.down.left.drop.right.up.carry.down.expandNode();
+		// s0.left.left.up.carry.left.down.left.drop.right.up.carry.down.left.expandNode();
+		// s0.left.left.up.carry.left.down.left.drop.right.up.carry.down.left.drop.expandNode();
+		// System.out.println(s0.left.left.up.carry.left.down.left.drop.right.up.carry.down.left.drop.isGoal);
+		// System.out.println(s0.state);
 
-		// s0.left.left.down.down.expandNode();
-		// s0.left.left.down.down.down.expandNode();
-		// System.out.println(s0.left.left.down.down.down.state);
-		// System.out.println(s0.right.neo.carriedSoFar);
-		// System.out.println(s0.right.carry.neo.carriedSoFar);
+		// s0.kill.expandNode();
+		// s0.kill.left.expandNode();
+		// s0.kill.left.kill.expandNode();
+		// s0.kill.left.kill.left.expandNode();
+		// s0.kill.left.kill.left.left.expandNode();
+		// s0.kill.left.kill.left.left.down.expandNode();
+		// s0.kill.left.kill.left.left.down.kill.expandNode();
+		// s0.kill.left.kill.left.left.down.kill.down.expandNode();
+		// s0.kill.left.kill.left.left.down.kill.down.down.expandNode();
+		// s0.kill.left.kill.left.left.down.kill.down.down.kill.expandNode();
+		// s0.kill.left.kill.left.left.down.kill.down.down.kill.left.expandNode();
+		// s0.kill.left.kill.left.left.down.kill.down.down.kill.left.down.expandNode();
+		// s0.kill.left.kill.left.left.down.kill.down.down.kill.left.down.takePill.expandNode();
+		// s0.kill.left.kill.left.left.down.kill.down.down.kill.left.down.takePill.up.expandNode();
+		// s0.kill.left.kill.left.left.down.kill.down.down.kill.left.down.takePill.up.up.expandNode();
+		// //
+		// System.out.println(s0.kill.left.kill.left.left.down.kill.down.down.kill.left.down.takePill.up.up.state);
+		// s0.kill.left.kill.left.left.down.kill.down.down.kill.left.down.takePill.up.up.carry.expandNode();
+		// s0.kill.left.kill.left.left.down.kill.down.down.kill.left.down.takePill.up.up.carry.down.expandNode();
+		// s0.kill.left.kill.left.left.down.kill.down.down.kill.left.down.takePill.up.up.carry.down.right.expandNode();
+		// s0.kill.left.kill.left.left.down.kill.down.down.kill.left.down.takePill.up.up.carry.down.right.right
+		// .expandNode();
+		// s0.kill.left.kill.left.left.down.kill.down.down.kill.left.down.takePill.up.up.carry.down.right.right.kill
+		// .expandNode();
+		// s0.kill.left.kill.left.left.down.kill.down.down.kill.left.down.takePill.up.up.carry.down.right.right.kill.right
+		// .expandNode();
+		// s0.kill.left.kill.left.left.down.kill.down.down.kill.left.down.takePill.up.up.carry.down.right.right.kill.right.right
+		// .expandNode();
+		// s0.kill.left.kill.left.left.down.kill.down.down.kill.left.down.takePill.up.up.carry.down.right.right.kill.right.right.down
+		// .expandNode();
+		// s0.kill.left.kill.left.left.down.kill.down.down.kill.left.down.takePill.up.up.carry.down.right.right.kill.right.right.down.drop
+		// .expandNode();
+		// // System.out.println("LLL");
+		// System.out.println(
+		// s0.kill.left.kill.left.left.down.kill.down.down.kill.left.down.takePill.up.up.carry.down.right.right.kill.right.right.down.drop.isGoal);
 
 	}
 }

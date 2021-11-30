@@ -1,3 +1,4 @@
+package code;
 
 public class LaunchingPad extends Occupant {
 	public LaunchingPad connectedLP;
