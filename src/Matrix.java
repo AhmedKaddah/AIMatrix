@@ -400,21 +400,23 @@ public class Matrix {
 	public static void main(String[] args) {
 		// stringToGrid("5,5;3;2,4;0,4;0,0,4,1;3,3,3,2;2,0,4,3;0,3,1,4,2,16,2,1,35,3,4,63,2,3,7,4,0,92,4,4,19");
 		// genGrid();
-		String result = solve("5,5;2;0,4;1,4;0,1,1,1,2,1,3,1,3,3,3,4;1,0,2,4;0,3,4,3,4,3,0,3;0,0,30,3,0,80,4,4,80",
+		String result = solve("5,5;2;3,4;1,2;0,3,1,4;2,3;4,4,0,2,0,2,4,4;2,2,91,2,4,62",
 				"BF");
 		System.out.println(result);
 		// System.out.println(BreadthFirst(s0));
 
 		// stateHash = new Hashtable<String, Integer>();
 		// Neo tempneo = new Neo(0, 4, 3, 2);
-		// Node s0 = new
-		// Node("5,5;2;0,4;1,4;0,1,1,1,2,1,3,1,3,3,3,4;0,4,2,4;0,3,4,3,4,3,0,3;0,0,30,3,0,80,4,4,80",
+		// Node s0 = new Node("5,5;2;3,4;1,2;0,3,1,4;2,3;4,4,0,2,0,2,4,4;2,2,91,2,4,62",
 		// 0, null, tempneo, 6, 3, 2);
 		// s0.expandNode();
-		// s0.takePill.expandNode();
-		// s0.takePill.right.expandNode();
-		// s0.takePill.right.right.expandNode();
-		// s0.takePill.right.right.kill.expandNode();
+		// s0.left.expandNode();
+		// s0.left.carry.expandNode();
+		// s0.left.carry.down.expandNode();
+		// s0.left.carry.down.down.expandNode();
+		// s0.left.carry.down.down.carry.expandNode();
+		// s0.left.carry.down.down.carry.left.expandNode();
+		// System.out.println(s0.left.carry.down.down.carry..);
 		// System.out.println(s0.state);
 		// System.out.println(s0.numberOfPills);
 		// System.out.println(s0.takePill.state);
