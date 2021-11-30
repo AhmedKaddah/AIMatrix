@@ -136,7 +136,7 @@ public class Node {
 
         }
 
-        if (Matrix.turnedToAgents.size() == 0 && neoInts[0] == teleboothInts[0] && neoInts[1] == teleboothInts[1]
+        if (neo.turnedToAgents.size() == 0 && neoInts[0] == teleboothInts[0] && neoInts[1] == teleboothInts[1]
                 && neo.carriedSoFar == 0) {
             for (int i = 0; i < hostagesInts.length; i += 3) {
                 if (teleboothInts[0] != hostagesInts[i]
@@ -153,27 +153,27 @@ public class Node {
         if (this.parent != null)
             switch (action) {
                 case "up":
-                    if (this.parent.down != null) {
+                    if (this.parent.down != null && this.parent.down.equals(this)) {
                         return true;
                     }
                     break;
                 case "down":
-                    if (this.parent.up != null) {
+                    if (this.parent.up != null && this.parent.up.equals(this)) {
                         return true;
                     }
                     break;
                 case "left":
-                    if (this.parent.right != null) {
+                    if (this.parent.right != null && this.parent.right.equals(this)) {
                         return true;
                     }
                     break;
                 case "right":
-                    if (this.parent.left != null) {
+                    if (this.parent.left != null && this.parent.left.equals(this)) {
                         return true;
                     }
                     break;
                 case "fly":
-                    if (this.parent.fly != null) {
+                    if (this.parent.fly != null && this.parent.fly.equals(this)) {
                         return true;
                     }
                     break;
@@ -182,13 +182,15 @@ public class Node {
         return false;
     }
 
-    public void removeFromTurnedToAgents(int x, int y) {
-        for (int i = 0; i < Matrix.turnedToAgents.size(); i += 2) {
-            if (Matrix.turnedToAgents.get(i) == x && Matrix.turnedToAgents.get(i + 1) == y) {
-                Matrix.turnedToAgents.remove(i);
-                Matrix.turnedToAgents.remove(i);
+    public ArrayList<Integer> removeFromTurnedToAgents(int x, int y, ArrayList<Integer> newturnedToAgents) {
+
+        for (int i = 0; i < newturnedToAgents.size(); i += 2) {
+            if (newturnedToAgents.get(i) == x && newturnedToAgents.get(i + 1) == y) {
+                newturnedToAgents.remove(i);
+                newturnedToAgents.remove(i);
             }
         }
+        return newturnedToAgents;
     }
 
     public Node applyOperator(String action) {
@@ -308,7 +310,7 @@ public class Node {
                         }
                     }
                     newNeo = new Neo(this.neo, neoInts[0], neoInts[1], this.neo.carriedHostagesIndex, this.neo.damage,
-                            this.neo.carriedSoFar);
+                            this.neo.carriedSoFar, this.neo.turnedToAgents);
                 } else {
                     actionEligible = false;
                 }
@@ -355,7 +357,7 @@ public class Node {
                         }
                     }
                     newNeo = new Neo(this.neo, neoInts[0], neoInts[1], this.neo.carriedHostagesIndex, this.neo.damage,
-                            this.neo.carriedSoFar);
+                            this.neo.carriedSoFar, this.neo.turnedToAgents);
                 } else {
                     actionEligible = false;
                 }
@@ -365,6 +367,7 @@ public class Node {
 
                 // System.out.println(Matrix.goalFoundNodes(this));
                 if (this.actionRepeatedCheck("left")) {
+                    // System.out.println(this.state);
                     actionEligible = false;
                     break;
                 }
@@ -382,6 +385,7 @@ public class Node {
                     int agentX = agentsInts[i];
                     int agentY = agentsInts[i + 1];
                     if (neoInts[0] - 1 == agentX && neoInts[1] == agentY) {
+                        // System.out.println(agentX + " " + agentY);
                         Agent = true;
                         break;
                     }
@@ -404,8 +408,11 @@ public class Node {
                         }
                     }
                     newNeo = new Neo(this.neo, neoInts[0], neoInts[1], this.neo.carriedHostagesIndex, this.neo.damage,
-                            this.neo.carriedSoFar);
+                            this.neo.carriedSoFar, this.neo.turnedToAgents);
                 } else {
+                    // System.out.println(this.state);
+                    // System.out.println(Wall);
+                    // System.out.println(Agent);
                     actionEligible = false;
                 }
                 break;
@@ -450,7 +457,7 @@ public class Node {
                         }
                     }
                     newNeo = new Neo(this.neo, neoInts[0], neoInts[1], this.neo.carriedHostagesIndex, this.neo.damage,
-                            this.neo.carriedSoFar);
+                            this.neo.carriedSoFar, this.neo.turnedToAgents);
                 } else {
                     actionEligible = false;
                 }
@@ -472,7 +479,11 @@ public class Node {
                     }
 
                 }
+                ArrayList<Integer> newturnedToAgents = new ArrayList<Integer>();
+                newturnedToAgents = (ArrayList) (neo.turnedToAgents).clone();
+
                 if (neo.damage + 20 < 100 && actionEligible) {
+
                     for (int i = 0; i < agentsInts.length; i = i + 2) {
                         int agentX = agentsInts[i];
                         int agentY = agentsInts[i + 1];
@@ -483,7 +494,7 @@ public class Node {
                             agentsInts = removeTheElement(agentsInts, i);
                             agentsInts = removeTheElement(agentsInts, i);
                             i -= 2;
-                            removeFromTurnedToAgents(neoInts[0] + 1, neoInts[1]);
+                            newturnedToAgents = removeFromTurnedToAgents(neoInts[0] + 1, neoInts[1], newturnedToAgents);
                             this.agentsToMinus++;
                         }
                         if ((neoInts[0] - 1 == agentX && neoInts[1] == agentY)) { // left
@@ -493,7 +504,7 @@ public class Node {
                             agentsInts = removeTheElement(agentsInts, i);
                             agentsInts = removeTheElement(agentsInts, i);
                             i -= 2;
-                            removeFromTurnedToAgents(neoInts[0] - 1, neoInts[1]);
+                            newturnedToAgents = removeFromTurnedToAgents(neoInts[0] - 1, neoInts[1], newturnedToAgents);
                             this.agentsToMinus++;
 
                         }
@@ -504,7 +515,7 @@ public class Node {
                             agentsInts = removeTheElement(agentsInts, i);
                             agentsInts = removeTheElement(agentsInts, i);
                             i -= 2;
-                            removeFromTurnedToAgents(neoInts[0], neoInts[1] - 1);
+                            newturnedToAgents = removeFromTurnedToAgents(neoInts[0], neoInts[1] - 1, newturnedToAgents);
                             this.agentsToMinus++;
 
                         }
@@ -515,7 +526,7 @@ public class Node {
                             agentsInts = removeTheElement(agentsInts, i);
                             agentsInts = removeTheElement(agentsInts, i);
                             i -= 2;
-                            removeFromTurnedToAgents(neoInts[0], neoInts[1] + 1);
+                            newturnedToAgents = removeFromTurnedToAgents(neoInts[0], neoInts[1] + 1, newturnedToAgents);
                             this.agentsToMinus++;
 
                         }
@@ -527,7 +538,7 @@ public class Node {
 
                     newNeo = new Neo(this.neo, neoInts[0], neoInts[1], this.neo.carriedHostagesIndex,
                             this.neo.damage + 20,
-                            this.neo.carriedSoFar);
+                            this.neo.carriedSoFar, newturnedToAgents);
 
                 } else {
                     actionEligible = false;
@@ -577,7 +588,7 @@ public class Node {
                     if (launchingPadTaken && actionEligible) {
                         newNeo = new Neo(this.neo, neoInts[0], neoInts[1], this.neo.carriedHostagesIndex,
                                 this.neo.damage,
-                                this.neo.carriedSoFar);
+                                this.neo.carriedSoFar, this.neo.turnedToAgents);
                     } else {
                         actionEligible = false;
 
@@ -610,7 +621,7 @@ public class Node {
 
                 if (hasCarried && actionEligible) {
                     newNeo = new Neo(this.neo, neoInts[0], neoInts[1], tempMaxCarriedHostageIndex, this.neo.damage,
-                            tempCarriedSoFar);
+                            tempCarriedSoFar, this.neo.turnedToAgents);
                 } else {
                     actionEligible = false;
                 }
@@ -635,7 +646,7 @@ public class Node {
                                 hostagesInts[j + 2] = 0;
                         }
                         newNeo = new Neo(this.neo, neoInts[0], neoInts[1], this.neo.carriedHostagesIndex,
-                                this.neo.damage - 20, this.neo.carriedSoFar);
+                                this.neo.damage - 20, this.neo.carriedSoFar, this.neo.turnedToAgents);
 
                     }
                 }
@@ -666,7 +677,7 @@ public class Node {
                         }
                     }
                     newNeo = new Neo(this.neo, neoInts[0], neoInts[1], tempMaxCarriedHostageIndex1, this.neo.damage,
-                            tempCarriedSoFar1);
+                            tempCarriedSoFar1, this.neo.turnedToAgents);
                 } else {
                     actionEligible = false;
                 }
@@ -706,9 +717,11 @@ public class Node {
                             newAgentInts[agentsInts.length] = hostageX;
                             newAgentInts[agentsInts.length + 1] = hostageY;
                             agentsInts = newAgentInts;
-                            Matrix.turnedToAgents.add(hostageX);
-                            Matrix.turnedToAgents.add(hostageY);
-
+                            ArrayList<Integer> newturnedToAgents = new ArrayList<Integer>();
+                            newturnedToAgents = (ArrayList) (neo.turnedToAgents).clone();
+                            newturnedToAgents.add(hostageX);
+                            newturnedToAgents.add(hostageY);
+                            newNeo.turnedToAgents = newturnedToAgents;
                             // REMOVE HOSTAGE FROM ARRAY
                             hostagesInts[i] = -99;
                             hostagesInts[i + 1] = -99;

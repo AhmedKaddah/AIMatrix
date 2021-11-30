@@ -6,6 +6,7 @@ public class Neo extends Occupant {
     public int damage;
     public ArrayList<Boolean> carriedHostagesIndex = new ArrayList<Boolean>();
     public int carriedSoFar;
+    public ArrayList<Integer> turnedToAgents = new ArrayList<Integer>();
 
     public Neo(int x, int y, int numberOfHostages, int maxCarriedHostages) {
         super(x, y);
@@ -20,12 +21,14 @@ public class Neo extends Occupant {
 
     }
 
-    public Neo(Neo oldNeo, int x, int y, ArrayList<Boolean> newCarriedHostagesIndex, int damage, int carriedSoFar) {
+    public Neo(Neo oldNeo, int x, int y, ArrayList<Boolean> newCarriedHostagesIndex, int damage, int carriedSoFar,
+            ArrayList<Integer> turnedToAgents) {
         super(x, y);
         maxCarriedHostages = oldNeo.maxCarriedHostages;
         this.damage = damage;
         this.carriedSoFar = carriedSoFar;
         this.carriedHostagesIndex = newCarriedHostagesIndex;
+        this.turnedToAgents = turnedToAgents;
 
     }
 }
