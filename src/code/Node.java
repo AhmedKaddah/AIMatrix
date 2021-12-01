@@ -10,6 +10,8 @@ public class Node {
 
     int accumilativeCost;
 
+    int depth;
+
     int numberOfHostages;
     int numberOfAgents;
     int numberOfPills;
@@ -33,20 +35,10 @@ public class Node {
     Node drop;
     Neo neo;
 
-    int upCost;
-    int downCost;
-    int rightCost;
-    int leftCost;
-    int killCost;
-    int flyCost;
-    int takePillCost;
-    int dropCost;
-    int carryCost;
-
     boolean isGoal;
 
     public Node(String state, int accumilativeCost, Node parent, Neo neo, int numberOfAgents, int numberOfHostages,
-            int numberOfPills, int deaths, int kills) {
+            int numberOfPills, int deaths, int kills, int depth) {
         this.state = state;
         this.accumilativeCost = accumilativeCost;
         this.parent = parent;
@@ -56,6 +48,7 @@ public class Node {
         this.numberOfPills = numberOfPills;
         this.kills = kills;
         this.deaths = deaths;
+        this.depth = depth;
 
     }
 
@@ -89,6 +82,20 @@ public class Node {
 
         // return the resultant array
         return anotherArray;
+    }
+
+    public int[] getClosesHostagetoTB(int x, int y, int[] hostagesInts) {
+        int closesHostageManhattan = Math.abs(hostagesInts[0] - x) + Math.abs(hostagesInts[1] - y);
+        int[] closestHostage = { hostagesInts[0], hostagesInts[1], closesHostageManhattan };
+        for (int i = 0; i < hostagesInts.length; i += 3) {
+            if ((Math.abs(hostagesInts[i] - x) + Math.abs(hostagesInts[i + 1] - y)) < closesHostageManhattan) {
+                closestHostage[0] = hostagesInts[i];
+                closestHostage[1] = hostagesInts[i + 1];
+                closesHostageManhattan = Math.abs(hostagesInts[i] - x) + Math.abs(hostagesInts[i + 1] - y);
+                closestHostage[2] = closesHostageManhattan;
+            }
+        }
+        return closestHostage;
     }
 
     public Node expandNode() {
@@ -570,41 +577,20 @@ public class Node {
                     actionEligible = false;
                     break;
                 }
+                boolean launchingPadTaken = false;
                 for (int i = 0; i < launchingPadsInts.length; i = i + 4) {
-                    boolean launchingPadTaken = false;
+
                     int launchingPadOneX = launchingPadsInts[i];
                     int launchingPadOneY = launchingPadsInts[i + 1];
                     int launchingPadTwoX = launchingPadsInts[i + 2];
                     int launchingPadTwoY = launchingPadsInts[i + 3];
-
-                    if (neoInts[0] == launchingPadOneX && neoInts[1] == launchingPadOneY) {
+                    if (neoInts[0] == launchingPadOneX && neoInts[1] == launchingPadOneY && !launchingPadTaken) {
                         launchingPadTaken = true;
                         neoInts[0] = launchingPadTwoX;
                         neoInts[1] = launchingPadTwoY;
-                        // for (int j = 0; j < neo.carriedHostagesIndex.size(); j++) {
-                        // if (neo.carriedHostagesIndex.get(j).equals(true)) {
-                        // hostagesInts[j * 3 + 1] = neoInts[1];
-                        // hostagesInts[j * 3] = neoInts[0];
-
-                        // }
-                        // }
+                        // neo bya5odha raye7 gy need to break
 
                     }
-                    // else {
-
-                    // if (neoInts[0] == launchingPadTwoX && neoInts[1] == launchingPadTwoY) {
-                    // launchingPadTaken = true;
-                    // neoInts[0] = launchingPadOneX;
-                    // neoInts[1] = launchingPadOneY;
-                    // for (int j = 0; j < neo.carriedHostagesIndex.size(); j++) {
-                    // if (neo.carriedHostagesIndex.get(j).equals(true)) {
-                    // hostagesInts[j * 3 + 1] = neoInts[1];
-                    // hostagesInts[j * 3] = neoInts[0];
-
-                    // }
-                    // }
-                    // }
-                    // }
 
                     if (launchingPadTaken && actionEligible) {
                         newNeo = new Neo(this.neo, neoInts[0], neoInts[1], this.neo.carriedHostages,
@@ -888,16 +874,15 @@ public class Node {
 
             Matrix.stateHash.put(accumilativeString, 1);
 
-            // System.out.println("ACTION: " + action);
-            // System.out.println("New State: " + accumilativeString);
-            // System.out.println(
-            // "Pills Before: " + this.numberOfPills + " Pills After: " +
-            // (this.numberOfPills - pillsToMinus));
+            int newPathCost = this.depth + 1 + (this.kills + this.killsToAdd) * 5
+                    + (this.deaths + this.deathsToAdd) * 100;
 
-            return new Node(accumilativeString, this.accumilativeCost, this, newNeo,
+            int newHeuristicCost = 0;
+
+            return new Node(accumilativeString, newPathCost, this, newNeo,
                     this.numberOfAgents - this.agentsToMinus,
                     this.numberOfHostages - this.hostagesToMinus, this.numberOfPills - this.pillsToMinus,
-                    this.deaths + this.deathsToAdd, this.kills + this.killsToAdd);
+                    this.deaths + this.deathsToAdd, this.kills + this.killsToAdd, this.depth + 1);
         } else {
 
             return null;

@@ -293,11 +293,17 @@ public class Matrix {
 
 		Neo tempNeo = new Neo(neoInts[0], neoInts[1], hostagesInts.length / 3, maxCarriedHostagesInts);
 		Node s0 = new Node(stringGrid, 0, null, tempNeo, agentsInts.length / 2, hostagesInts.length / 3,
-				pillsInts.length / 2, 0, 0);
+				pillsInts.length / 2, 0, 0, 0);
 
 		switch (algorithm) {
 			case "BF":
 				return BreadthFirst(s0);
+			case "DF":
+				return DepthFirst(s0);
+			case "ID":
+				return IterativeDeepening(s0);
+			case "UC":
+				return UniformCost(s0);
 
 		}
 		return "";
@@ -388,31 +394,171 @@ public class Matrix {
 
 	}
 
-	// public static String BreadthFirst() {
-	// public static ArrayList<Integer> turnedToAgents = new ArrayList<Integer>();
+	public static String DepthFirst(Node S0) {
+		int numberOfExpansions = 0;
+		PriorityQueue<Map.Entry<Node, Integer>> queue = new PriorityQueue<>(
+				Map.Entry.comparingByValue(Comparator.reverseOrder()));
+		queue.offer(new AbstractMap.SimpleEntry<>(S0, numberOfExpansions++));
 
-	// return "";
-	// }
+		while (queue.size() > 0) {
+			Node dequeuedNode = queue.poll().getKey();
+			dequeuedNode.expandNode();
+			if (dequeuedNode.isGoal) {
+				return goalFound(dequeuedNode);
+			}
+			if (dequeuedNode.left != null) {
+				queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.left, numberOfExpansions++));
+			}
+			if (dequeuedNode.right != null) {
+				queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.right, numberOfExpansions++));
+			}
+			if (dequeuedNode.up != null) {
+				queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.up, numberOfExpansions++));
+			}
+			if (dequeuedNode.down != null) {
+				queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.down, numberOfExpansions++));
+			}
+			if (dequeuedNode.carry != null) {
+				queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.carry, numberOfExpansions++));
+			}
+			if (dequeuedNode.fly != null) {
+				queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.fly, numberOfExpansions++));
+			}
+			if (dequeuedNode.takePill != null) {
+				queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.takePill, numberOfExpansions++));
+			}
+			if (dequeuedNode.kill != null) {
+				queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.kill, numberOfExpansions++));
+			}
+			if (dequeuedNode.drop != null) {
+				queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.drop, numberOfExpansions++));
+			}
+		}
+
+		return "No Solution";
+
+	}
+
+	public static String IterativeDeepening(Node S0) {
+		int numberOfExpansions = 0;
+		int currentDepth = 0;
+		PriorityQueue<Map.Entry<Node, Integer>> queue = new PriorityQueue<>(
+				Map.Entry.comparingByValue(Comparator.reverseOrder()));
+
+		while (currentDepth < 32) {
+			stateHash = new Hashtable<String, Integer>();
+			queue.offer(new AbstractMap.SimpleEntry<>(S0, numberOfExpansions++));
+
+			while (queue.size() > 0) {
+				Node dequeuedNode = queue.poll().getKey();
+
+				if (dequeuedNode.depth < currentDepth) {
+					dequeuedNode.expandNode();
+					if (dequeuedNode.isGoal) {
+						System.out.println(currentDepth);
+						return goalFound(dequeuedNode);
+					}
+					if (dequeuedNode.left != null) {
+						queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.left, numberOfExpansions++));
+
+					}
+					if (dequeuedNode.right != null) {
+						queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.right, numberOfExpansions++));
+					}
+					if (dequeuedNode.up != null) {
+
+						queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.up, numberOfExpansions++));
+					}
+					if (dequeuedNode.down != null) {
+						queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.down, numberOfExpansions++));
+					}
+					if (dequeuedNode.carry != null) {
+						queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.carry, numberOfExpansions++));
+					}
+					if (dequeuedNode.fly != null) {
+						queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.fly, numberOfExpansions++));
+					}
+					if (dequeuedNode.takePill != null) {
+						queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.takePill, numberOfExpansions++));
+					}
+					if (dequeuedNode.kill != null) {
+						queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.kill, numberOfExpansions++));
+					}
+					if (dequeuedNode.drop != null) {
+						queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.drop, numberOfExpansions++));
+					}
+
+				}
+
+			}
+			currentDepth++;
+		}
+
+		return "No Solution";
+
+	}
+
+	public static String UniformCost(Node S0) {
+		PriorityQueue<Map.Entry<Node, Integer>> queue = new PriorityQueue<>(
+				Map.Entry.comparingByValue());
+		queue.offer(new AbstractMap.SimpleEntry<>(S0, 0));
+
+		while (queue.size() > 0) {
+			Node dequeuedNode = queue.poll().getKey();
+			dequeuedNode.expandNode();
+			if (dequeuedNode.isGoal) {
+				return goalFound(dequeuedNode);
+			}
+			if (dequeuedNode.left != null) {
+				queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.left, dequeuedNode.left.accumilativeCost));
+			}
+			if (dequeuedNode.right != null) {
+				queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.right, dequeuedNode.right.accumilativeCost));
+			}
+			if (dequeuedNode.up != null) {
+				queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.up, dequeuedNode.up.accumilativeCost));
+			}
+			if (dequeuedNode.down != null) {
+				queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.down, dequeuedNode.down.accumilativeCost));
+			}
+			if (dequeuedNode.carry != null) {
+				queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.carry, dequeuedNode.carry.accumilativeCost));
+			}
+			if (dequeuedNode.fly != null) {
+				queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.fly, dequeuedNode.fly.accumilativeCost));
+			}
+			if (dequeuedNode.takePill != null) {
+				queue.offer(
+						new AbstractMap.SimpleEntry<>(dequeuedNode.takePill, dequeuedNode.takePill.accumilativeCost));
+			}
+			if (dequeuedNode.kill != null) {
+				queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.kill, dequeuedNode.kill.accumilativeCost));
+			}
+			if (dequeuedNode.drop != null) {
+				queue.offer(new AbstractMap.SimpleEntry<>(dequeuedNode.drop, dequeuedNode.drop.accumilativeCost));
+			}
+		}
+
+		return "No Solution";
+
+	}
 
 	public static void main(String[] args) {
-		// stringToGrid("5,5;3;2,4;0,4;0,0,4,1;3,3,3,2;2,0,4,3;0,3,1,4,2,16,2,1,35,3,4,63,2,3,7,4,0,92,4,4,19");
-		// genGrid();
-		// String result =
-		// solve("5,5;2;3,4;1,2;0,3,1,4;2,3;4,4,0,2,0,2,4,4;2,2,91,2,4,62",
-		// "BF");
+
 		String result = solve(
-				"5,5;2;3,2;0,1;4,1;0,3;1,2,4,2,4,2,1,2,0,4,3,0,3,0,0,4;1,1,77,3,4,34",
-				"BF", true);
+				"5,5;2;0,4;3,4;3,1,1,1;2,3;3,0,0,1,0,1,3,0;4,2,54,4,0,85,1,0,43",
+				"ID", true);
 		System.out.println(result);
-		// System.out.println(BreadthFirst(s0));
 
 		// stateHash = new Hashtable<String, Integer>();
-		// Neo tempneo = new Neo(1, 4, 2, 1);
+		// Neo tempneo = new Neo(1, 4, 2, 2);
 		// Node s0 = new Node(
-		// "5,5;1;1,4;1,0;0,4;0,0,2,2;3,4,4,2,4,2,3,4;0,2,32,0,1,38",
-		// 0, null, tempneo, 1, 2, 2, 0, 0);
+		// "5,5;2;3,4;1,2;0,3,1,4;2,3;4,4,0,2,0,2,4,4;2,2,91,2,4,62",
+		// 0, null, tempneo, 2, 2, 1, 0, 0);
 		// s0.expandNode();
-		// s0.left.expandNode();
+		// s0.down.expandNode();
+		// System.out.println(s0.down.fly.state);
+
 		// s0.left.left.expandNode();
 		// s0.left.left.up.expandNode();
 		// s0.left.left.up.carry.expandNode();
