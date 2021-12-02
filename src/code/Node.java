@@ -9,6 +9,9 @@ public class Node {
     String state;
 
     int accumilativeCost;
+    int heuristicType;
+
+    boolean isGreedy;
 
     int depth;
 
@@ -38,7 +41,7 @@ public class Node {
     boolean isGoal;
 
     public Node(String state, int accumilativeCost, Node parent, Neo neo, int numberOfAgents, int numberOfHostages,
-            int numberOfPills, int deaths, int kills, int depth) {
+            int numberOfPills, int deaths, int kills, int depth, int heuristicType, boolean isGreedy) {
         this.state = state;
         this.accumilativeCost = accumilativeCost;
         this.parent = parent;
@@ -49,6 +52,8 @@ public class Node {
         this.kills = kills;
         this.deaths = deaths;
         this.depth = depth;
+        this.heuristicType = heuristicType;
+        this.isGreedy = isGreedy;
 
     }
 
@@ -874,15 +879,34 @@ public class Node {
 
             Matrix.stateHash.put(accumilativeString, 1);
 
-            int newPathCost = this.depth + 1 + (this.kills + this.killsToAdd) * 5
-                    + (this.deaths + this.deathsToAdd) * 100;
+            int newPathCost = 0;
+
+            if (!isGreedy) {
+                newPathCost = this.depth + 1 + (this.kills + this.killsToAdd) * 100
+                        + (this.deaths + this.deathsToAdd) * 1100;
+            }
 
             int newHeuristicCost = 0;
 
-            return new Node(accumilativeString, newPathCost, this, newNeo,
+            if (heuristicType == 1) {
+                if (kills > 0) {
+                    newHeuristicCost = ((hostagesInts.length / 3) * (kills * 100))
+                            + ((newNeo.turnedToAgents.size() / 2) * 1100);
+                } else {
+                    newHeuristicCost = (hostagesInts.length / 3) + ((newNeo.turnedToAgents.size() / 2) * 1100);
+                }
+            }
+
+            if (heuristicType == 2) {
+
+                newHeuristicCost = (hostagesInts.length / 3);
+            }
+
+            return new Node(accumilativeString, newPathCost + newHeuristicCost, this, newNeo,
                     this.numberOfAgents - this.agentsToMinus,
                     this.numberOfHostages - this.hostagesToMinus, this.numberOfPills - this.pillsToMinus,
-                    this.deaths + this.deathsToAdd, this.kills + this.killsToAdd, this.depth + 1);
+                    this.deaths + this.deathsToAdd, this.kills + this.killsToAdd, this.depth + 1, this.heuristicType,
+                    isGreedy);
         } else {
 
             return null;

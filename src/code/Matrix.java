@@ -292,17 +292,42 @@ public class Matrix {
 		int maxCarriedHostagesInts = Integer.parseInt(maxCarriedHostagesString);
 
 		Neo tempNeo = new Neo(neoInts[0], neoInts[1], hostagesInts.length / 3, maxCarriedHostagesInts);
-		Node s0 = new Node(stringGrid, 0, null, tempNeo, agentsInts.length / 2, hostagesInts.length / 3,
-				pillsInts.length / 2, 0, 0, 0);
+		Node s0;
 
 		switch (algorithm) {
 			case "BF":
+				s0 = new Node(stringGrid, 0, null, tempNeo, agentsInts.length / 2, hostagesInts.length / 3,
+						pillsInts.length / 2, 0, 0, 0, 0, false);
 				return BreadthFirst(s0);
 			case "DF":
+				s0 = new Node(stringGrid, 0, null, tempNeo, agentsInts.length / 2, hostagesInts.length / 3,
+						pillsInts.length / 2, 0, 0, 0, 0, false);
 				return DepthFirst(s0);
 			case "ID":
+				s0 = new Node(stringGrid, 0, null, tempNeo, agentsInts.length / 2, hostagesInts.length / 3,
+						pillsInts.length / 2, 0, 0, 0, 0, false);
 				return IterativeDeepening(s0);
 			case "UC":
+				s0 = new Node(stringGrid, 0, null, tempNeo, agentsInts.length / 2, hostagesInts.length / 3,
+						pillsInts.length / 2, 0, 0, 0, 0, false);
+				return UniformCost(s0);
+			case "GR1":
+				s0 = new Node(stringGrid, 0, null, tempNeo, agentsInts.length / 2, hostagesInts.length / 3,
+						pillsInts.length / 2, 0, 0, 0, 1, true);
+				return UniformCost(s0);
+			case "GR2":
+				s0 = new Node(stringGrid, 0, null, tempNeo, agentsInts.length / 2,
+						hostagesInts.length / 3,
+						pillsInts.length / 2, 0, 0, 0, 2, true);
+				return UniformCost(s0);
+			case "AS1":
+				s0 = new Node(stringGrid, 0, null, tempNeo, agentsInts.length / 2, hostagesInts.length / 3,
+						pillsInts.length / 2, 0, 0, 0, 1, false);
+				return UniformCost(s0);
+			case "AS2":
+				s0 = new Node(stringGrid, 0, null, tempNeo, agentsInts.length / 2,
+						hostagesInts.length / 3,
+						pillsInts.length / 2, 0, 0, 0, 2, false);
 				return UniformCost(s0);
 
 		}
@@ -345,6 +370,7 @@ public class Matrix {
 	}
 
 	public static String goalFound(Node x) {
+		// System.out.println(x.parent.);
 		return goalFoundNodes(x).substring(1) + ";" + x.deaths + ";" + x.kills + ";"
 				+ Matrix.numberOfExpanded;
 	}
@@ -445,7 +471,7 @@ public class Matrix {
 		PriorityQueue<Map.Entry<Node, Integer>> queue = new PriorityQueue<>(
 				Map.Entry.comparingByValue(Comparator.reverseOrder()));
 
-		while (currentDepth < 32) {
+		while (currentDepth < Integer.MAX_VALUE) {
 			stateHash = new Hashtable<String, Integer>();
 			queue.offer(new AbstractMap.SimpleEntry<>(S0, numberOfExpansions++));
 
@@ -545,10 +571,26 @@ public class Matrix {
 
 	public static void main(String[] args) {
 
+		String grid0 = "5,5;2;3,4;1,2;0,3,1,4;2,3;4,4,0,2,0,2,4,4;2,2,91,2,4,62";
+		String grid1 = "5,5;1;1,4;1,0;0,4;0,0,2,2;3,4,4,2,4,2,3,4;0,2,32,0,1,38";
+		String grid2 = "5,5;2;3,2;0,1;4,1;0,3;1,2,4,2,4,2,1,2,0,4,3,0,3,0,0,4;1,1,77,3,4,34";
+		String grid3 = "5,5;1;0,4;4,4;0,3,1,4,2,1,3,0,4,1;4,0;2,4,3,4,3,4,2,4;0,2,98,1,2,98,2,2,98,3,2,98,4,2,98,2,0,1";
+		String grid4 = "5,5;1;0,4;4,4;0,3,1,4,2,1,3,0,4,1;4,0;2,4,3,4,3,4,2,4;0,2,98,1,2,98,2,2,98,3,2,98,4,2,98,2,0,98,1,0,98";
+		String grid5 = "5,5;2;0,4;3,4;3,1,1,1;2,3;3,0,0,1,0,1,3,0;4,2,54,4,0,85,1,0,43";
+		String grid6 = "5,5;2;3,0;4,3;2,1,2,2,3,1,0,0,1,1,4,2,3,3,1,3,0,1;2,4,3,2,3,4,0,4;4,4,4,0,4,0,4,4;1,4,57,2,0,46";
+		String grid7 = "5,5;3;1,3;4,0;0,1,3,2,4,3,2,4,0,4;3,4,3,0,4,2;1,4,1,2,1,2,1,4,0,3,1,0,1,0,0,3;4,4,45,3,3,12,0,2,88";
+		String grid8 = "5,5;2;4,3;2,1;2,0,0,4,0,3,0,1;3,1,3,2;4,4,3,3,3,3,4,4;4,0,17,1,2,54,0,0,46,4,1,22";
+		String grid9 = "5,5;2;0,4;1,4;0,1,1,1,2,1,3,1,3,3,3,4;1,0,2,4;0,3,4,3,4,3,0,3;0,0,30,3,0,80,4,4,80";
+		String grid10 = "5,5;4;1,1;4,1;2,4,0,4,3,2,3,0,4,2,0,1,1,3,2,1;4,0,4,4,1,0;2,0,0,2,0,2,2,0;0,0,62,4,3,45,3,3,39,2,3,40";
+
 		String result = solve(
-				"5,5;2;0,4;3,4;3,1,1,1;2,3;3,0,0,1,0,1,3,0;4,2,54,4,0,85,1,0,43",
-				"ID", true);
+				grid9,
+				"AS1", true);
 		System.out.println(result);
+		// String result1 = solve(
+		// grid,
+		// "AS1", true);
+		// System.out.println(result1);
 
 		// stateHash = new Hashtable<String, Integer>();
 		// Neo tempneo = new Neo(1, 4, 2, 2);
