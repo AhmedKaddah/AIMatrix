@@ -898,8 +898,13 @@ public class Node {
             }
 
             if (heuristicType == 2) {
+                // if (kills > 0) {
+                //     newHeuristicCost = (hostagesInts.length / 3) * (kills * 100);
+                // } else {
+                //     newHeuristicCost = (hostagesInts.length / 3);
+                // }
+                
 
-                newHeuristicCost = (hostagesInts.length / 3);
             }
 
             return new Node(accumilativeString, newPathCost + newHeuristicCost, this, newNeo,

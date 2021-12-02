@@ -584,8 +584,8 @@ public class Matrix {
 		String grid10 = "5,5;4;1,1;4,1;2,4,0,4,3,2,3,0,4,2,0,1,1,3,2,1;4,0,4,4,1,0;2,0,0,2,0,2,2,0;0,0,62,4,3,45,3,3,39,2,3,40";
 
 		String result = solve(
-				grid9,
-				"AS1", true);
+				grid1,
+				"AS2", true);
 		System.out.println(result);
 		// String result1 = solve(
 		// grid,
