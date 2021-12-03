@@ -188,7 +188,7 @@ public class Matrix {
 		return "";
 	}
 
-	public static void stringToGrid(String stringGrid, int numberOfAgents, int numberOfPills, int numberOfHostages) {
+	public static void stringToGrid(String stringGrid, int numberOfAgents, int numberOfPills, int numberOfHostages , Neo stateNeo) {
 		 int k = 0;
 		String splitString[] = stringGrid.split(";");
 	        String mapString[] = splitString[0].split(",");
@@ -276,11 +276,27 @@ public class Matrix {
 			map[launchingPadsInts[i + 2]][launchingPadsInts[i + 3]].occupant = new LaunchingPad(
 					launchingPadsInts[i + 2], launchingPadsInts[i + 3]);
 		}
+		boolean carried = false;
 		for (int i = 0; i < hostagesInts.length; i += 3) {
 			Hostage tempHostage = new Hostage(hostagesInts[i], hostagesInts[i + 1]);
-			map[hostagesInts[i]][hostagesInts[i + 1]].occupant = tempHostage;
-			tempHostage.damage = hostagesInts[2];
+			for (int j = 0; j < stateNeo.carriedHostages.size(); j+=2) {
+					if(stateNeo.carriedHostages.get(j) == hostagesInts[i] && stateNeo.carriedHostages.get(j+1) == hostagesInts[i+1])
+					{
+						carried = true;
+					}
+					else {
+					
 
+					}
+				
+			}
+			if(!carried)
+			{
+				map[hostagesInts[i]][hostagesInts[i + 1]].occupant = tempHostage;
+				tempHostage.damage = hostagesInts[2];
+			}
+		
+			carried = false;
 		}
 		Neo = new Neo(neoInts[0], neoInts[1], hostagesInts.length / 3, maxCarriedHostagesInts);
 		map[Neo.x][Neo.y].occupant = Neo;
@@ -366,62 +382,62 @@ public class Matrix {
 
 	public static String goalFoundNodes(Node x) {
 		if (x.parent == null) {
-		      Matrix.stringToGrid(x.state , x.numberOfAgents , x.numberOfPills , x.numberOfHostages);
+		      Matrix.stringToGrid(x.state , x.numberOfAgents , x.numberOfPills , x.numberOfHostages, x.neo);
 
 			return "";
 		}
 		if (x.parent.up != null && x.parent.up.equals(x)) {
 			if(visualize) {
-			      Matrix.stringToGrid(x.state , x.numberOfAgents , x.numberOfPills , x.numberOfHostages);
+			      Matrix.stringToGrid(x.state , x.numberOfAgents , x.numberOfPills , x.numberOfHostages, x.neo);
 		      }
 			return goalFoundNodes(x.parent) + "," + "up";
 		}
 		if (x.parent.down != null && x.parent.down.equals(x)) {
 			if(visualize) {
-			      Matrix.stringToGrid(x.state , x.numberOfAgents , x.numberOfPills , x.numberOfHostages);
+			      Matrix.stringToGrid(x.state , x.numberOfAgents , x.numberOfPills , x.numberOfHostages, x.neo);
 			      }
 			
 			return goalFoundNodes(x.parent) + "," + "down";
 		}
 		if (x.parent.left != null && x.parent.left.equals(x)) {
 			if(visualize) {
-			      Matrix.stringToGrid(x.state , x.numberOfAgents , x.numberOfPills , x.numberOfHostages);
+			      Matrix.stringToGrid(x.state , x.numberOfAgents , x.numberOfPills , x.numberOfHostages, x.neo);
 			      }
 			return goalFoundNodes(x.parent) + "," + "left";
 		}
 		if (x.parent.right != null && x.parent.right.equals(x)) {
 			if(visualize) {
-			      Matrix.stringToGrid(x.state , x.numberOfAgents , x.numberOfPills , x.numberOfHostages);
+			      Matrix.stringToGrid(x.state , x.numberOfAgents , x.numberOfPills , x.numberOfHostages, x.neo);
 			      }
 			return goalFoundNodes(x.parent) + "," + "right";
 		}
 		if (x.parent.kill != null && x.parent.kill.equals(x)) {
 			if(visualize) {
-			      Matrix.stringToGrid(x.state , x.numberOfAgents , x.numberOfPills , x.numberOfHostages);
+			      Matrix.stringToGrid(x.state , x.numberOfAgents , x.numberOfPills , x.numberOfHostages, x.neo);
 			      }
 			return goalFoundNodes(x.parent) + "," + "kill";
 		}
 		if (x.parent.fly != null && x.parent.fly.equals(x)) {
 			if(visualize) {
-			      Matrix.stringToGrid(x.state , x.numberOfAgents , x.numberOfPills , x.numberOfHostages);
+			      Matrix.stringToGrid(x.state , x.numberOfAgents , x.numberOfPills , x.numberOfHostages, x.neo);
 			      }
 			return goalFoundNodes(x.parent) + "," + "fly";
 		}
 		if (x.parent.carry != null && x.parent.carry.equals(x)) {
 			if(visualize) {
-			      Matrix.stringToGrid(x.state , x.numberOfAgents , x.numberOfPills , x.numberOfHostages);
+			      Matrix.stringToGrid(x.state , x.numberOfAgents , x.numberOfPills , x.numberOfHostages, x.neo);
 			      }
 			return goalFoundNodes(x.parent) + "," + "carry";
 		}
 		if (x.parent.takePill != null && x.parent.takePill.equals(x)) {
 			if(visualize) {
-			      Matrix.stringToGrid(x.state , x.numberOfAgents , x.numberOfPills , x.numberOfHostages);
+			      Matrix.stringToGrid(x.state , x.numberOfAgents , x.numberOfPills , x.numberOfHostages, x.neo);
 			      }
 			return goalFoundNodes(x.parent) + "," + "takePill";
 		}
 		if (x.parent.drop != null && x.parent.drop.equals(x)) {
 			if(visualize) {
-			      Matrix.stringToGrid(x.state , x.numberOfAgents , x.numberOfPills , x.numberOfHostages);
+			      Matrix.stringToGrid(x.state , x.numberOfAgents , x.numberOfPills , x.numberOfHostages, x.neo);
 			      }
 			return goalFoundNodes(x.parent) + "," + "drop";
 		}
@@ -659,7 +675,7 @@ public class Matrix {
 		
 		String result = solve(
 				grid2,
-				"DF", true);
+				"AS2", true);
 		System.out.println(result);
 		System.out.println(String.format("Used heap memory: %.2f GB", 
 
