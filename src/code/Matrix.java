@@ -1,5 +1,7 @@
 package code;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -297,7 +299,7 @@ public class Matrix {
 		Node s0;
 		Matrix.intialAgents = agentsInts.length / 2;
 		Matrix.intialHostages = hostagesInts.length / 3;
-
+		
 		switch (algorithm) {
 			case "BF":
 				s0 = new Node(stringGrid, 0, null, tempNeo, agentsInts.length / 2, hostagesInts.length / 3,
@@ -586,11 +588,28 @@ public class Matrix {
 		String grid8 = "5,5;2;4,3;2,1;2,0,0,4,0,3,0,1;3,1,3,2;4,4,3,3,3,3,4,4;4,0,17,1,2,54,0,0,46,4,1,22";
 		String grid9 = "5,5;2;0,4;1,4;0,1,1,1,2,1,3,1,3,3,3,4;1,0,2,4;0,3,4,3,4,3,0,3;0,0,30,3,0,80,4,4,80";
 		String grid10 = "5,5;4;1,1;4,1;2,4,0,4,3,2,3,0,4,2,0,1,1,3,2,1;4,0,4,4,1,0;2,0,0,2,0,2,2,0;0,0,62,4,3,45,3,3,39,2,3,40";
+		
+		MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
 
+		System.out.println(String.format("Initial memory: %.2f GB", 
+
+		  (double)memoryMXBean.getHeapMemoryUsage().getInit() /1073741824));
+
+	
+
+		System.out.println(String.format("Max heap memory: %.2f GB", 
+
+		  (double)memoryMXBean.getHeapMemoryUsage().getMax() /1073741824));
+
+		System.out.println(String.format("Committed memory: %.2f GB",(double)memoryMXBean.getHeapMemoryUsage().getCommitted() /1073741824));
+		
 		String result = solve(
 				grid10,
-				"AS2", true);
+				"AS1", true);
 		System.out.println(result);
+		System.out.println(String.format("Used heap memory: %.2f GB", 
+
+				  (double)memoryMXBean.getHeapMemoryUsage().getUsed() /1073741824));
 		// String result1 = solve(
 		// grid,
 		// "AS1", true);
