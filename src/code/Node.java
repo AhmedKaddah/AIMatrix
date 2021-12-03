@@ -291,6 +291,8 @@ public class Node {
             hostagesInts[i] = Integer.parseInt(hostagesString[i]);
 
         }
+        
+
 
         Neo newNeo = null;
 
@@ -743,6 +745,9 @@ public class Node {
             default:
                 System.out.println("defaulted the case");
                 break;
+                
+                
+
         }
 
         // TIME TICK
@@ -871,6 +876,7 @@ public class Node {
         }
         accumilativeString = accumilativeString.substring(0, accumilativeString.length() - 1);
         accumilativeString += ";";
+        
 
         if (actionEligible) {
 

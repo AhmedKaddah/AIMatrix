@@ -26,6 +26,7 @@ public class Matrix {
 	public static int numberOfExpanded;
 	public static int intialHostages;
 	public static int intialAgents;
+	public static boolean visualize;
 
 	public static Hashtable<String, Integer> stateHash;
 
@@ -187,48 +188,69 @@ public class Matrix {
 		return "";
 	}
 
-	public static void stringToGrid(String stringGrid) {
+	public static void stringToGrid(String stringGrid, int numberOfAgents, int numberOfPills, int numberOfHostages) {
+		 int k = 0;
 		String splitString[] = stringGrid.split(";");
-		String mapString[] = splitString[0].split(",");
-		String maxCarriedHostagesString = splitString[1];
-		String neoString[] = splitString[2].split(",");
-		String teleboothString[] = splitString[3].split(",");
-		String agentsString[] = splitString[4].split(",");
-		String pillsString[] = splitString[5].split(",");
-		String launchingPadsString[] = splitString[6].split(",");
-		String hostagesString[] = splitString[7].split(",");
+	        String mapString[] = splitString[0].split(",");
+	        String maxCarriedHostagesString = splitString[1];
+	        String neoString[] = splitString[2].split(",");
+	        String teleboothString[] = splitString[3].split(",");
+	        String agentsString[] = {};
+	        if (numberOfAgents == 0) {
+	            k++;
+	        } else {
+	            agentsString = splitString[4 - k].split(",");
+	        }
 
-		int[] mapInts = new int[mapString.length];
-		for (int i = 0; i < mapString.length; i++) {
-			mapInts[i] = Integer.parseInt(mapString[i]);
-		}
+	        String pillsString[] = {};
 
-		int maxCarriedHostagesInts = Integer.parseInt(maxCarriedHostagesString);
+	        if (numberOfPills == 0) {
+	            k++;
+	        } else {
+	            pillsString = splitString[5 - k].split(",");
+	        }
+	        String launchingPadsString[] = splitString[6 - k].split(",");
 
-		int[] neoInts = new int[neoString.length];
-		for (int i = 0; i < neoString.length; i++) {
-			neoInts[i] = Integer.parseInt(neoString[i]);
-		}
-		int[] teleboothInts = new int[teleboothString.length];
-		for (int i = 0; i < teleboothString.length; i++) {
-			teleboothInts[i] = Integer.parseInt(teleboothString[i]);
-		}
-		int[] agentsInts = new int[agentsString.length];
-		for (int i = 0; i < agentsString.length; i++) {
-			agentsInts[i] = Integer.parseInt(agentsString[i]);
-		}
-		int[] pillsInts = new int[pillsString.length];
-		for (int i = 0; i < pillsString.length; i++) {
-			pillsInts[i] = Integer.parseInt(pillsString[i]);
-		}
-		int[] launchingPadsInts = new int[launchingPadsString.length];
-		for (int i = 0; i < launchingPadsString.length; i++) {
-			launchingPadsInts[i] = Integer.parseInt(launchingPadsString[i]);
-		}
-		int[] hostagesInts = new int[hostagesString.length];
-		for (int i = 0; i < hostagesString.length; i++) {
-			hostagesInts[i] = Integer.parseInt(hostagesString[i]);
-		}
+	        String hostagesString[] = {};
+	        if (numberOfHostages != 0) {
+	            hostagesString = splitString[7 - k].split(",");
+	        }
+
+	        int[] mapInts = new int[mapString.length];
+	        for (int i = 0; i < mapString.length; i++) {
+	            mapInts[i] = Integer.parseInt(mapString[i]);
+	        }
+
+	        int maxCarriedHostagesInts = Integer.parseInt(maxCarriedHostagesString);
+
+	        int[] neoInts = new int[neoString.length];
+	        for (int i = 0; i < neoString.length; i++) {
+	            neoInts[i] = Integer.parseInt(neoString[i]);
+	        }
+	        int[] teleboothInts = new int[teleboothString.length];
+	        for (int i = 0; i < teleboothString.length; i++) {
+	            teleboothInts[i] = Integer.parseInt(teleboothString[i]);
+	        }
+	        int[] agentsInts = new int[agentsString.length];
+	        for (int i = 0; i < agentsString.length; i++) {
+	            agentsInts[i] = Integer.parseInt(agentsString[i]);
+	        }
+
+	        int[] pillsInts = new int[pillsString.length];
+	        for (int i = 0; i < pillsString.length; i++) {
+
+	            pillsInts[i] = Integer.parseInt(pillsString[i]);
+	        }
+	        int[] launchingPadsInts = new int[launchingPadsString.length];
+	        for (int i = 0; i < launchingPadsString.length; i++) {
+	            launchingPadsInts[i] = Integer.parseInt(launchingPadsString[i]);
+	        }
+	        int[] hostagesInts = new int[hostagesString.length];
+	        for (int i = 0; i < hostagesString.length; i++) {
+	            hostagesInts[i] = Integer.parseInt(hostagesString[i]);
+
+	        }
+	
 
 		map = new Tile[mapInts[0]][mapInts[1]];
 		// Generate empty grid
@@ -237,8 +259,7 @@ public class Matrix {
 				map[i][j] = new Tile();
 			}
 		}
-		Neo = new Neo(neoInts[0], neoInts[1], hostagesInts.length / 3, maxCarriedHostagesInts);
-		map[Neo.x][Neo.y].hasNeo = true;
+		
 		TeleBooth = new TeleBooth(teleboothInts[0], teleboothInts[1]);
 		map[TeleBooth.x][TeleBooth.y].occupant = TeleBooth;
 
@@ -261,6 +282,8 @@ public class Matrix {
 			tempHostage.damage = hostagesInts[2];
 
 		}
+		Neo = new Neo(neoInts[0], neoInts[1], hostagesInts.length / 3, maxCarriedHostagesInts);
+		map[Neo.x][Neo.y].occupant = Neo;
 		System.out.println(Arrays.deepToString(map).replace("], ", "]\n"));
 
 	}
@@ -272,6 +295,7 @@ public class Matrix {
 		String agentsString[] = splitString[4].split(",");
 		String pillsString[] = splitString[5].split(",");
 		String hostagesString[] = splitString[7].split(",");
+		Matrix.visualize = visualize;
 
 		stateHash = new Hashtable<String, Integer>();
 
@@ -342,33 +366,63 @@ public class Matrix {
 
 	public static String goalFoundNodes(Node x) {
 		if (x.parent == null) {
+		      Matrix.stringToGrid(x.state , x.numberOfAgents , x.numberOfPills , x.numberOfHostages);
+
 			return "";
 		}
 		if (x.parent.up != null && x.parent.up.equals(x)) {
+			if(visualize) {
+			      Matrix.stringToGrid(x.state , x.numberOfAgents , x.numberOfPills , x.numberOfHostages);
+		      }
 			return goalFoundNodes(x.parent) + "," + "up";
 		}
 		if (x.parent.down != null && x.parent.down.equals(x)) {
+			if(visualize) {
+			      Matrix.stringToGrid(x.state , x.numberOfAgents , x.numberOfPills , x.numberOfHostages);
+			      }
+			
 			return goalFoundNodes(x.parent) + "," + "down";
 		}
 		if (x.parent.left != null && x.parent.left.equals(x)) {
+			if(visualize) {
+			      Matrix.stringToGrid(x.state , x.numberOfAgents , x.numberOfPills , x.numberOfHostages);
+			      }
 			return goalFoundNodes(x.parent) + "," + "left";
 		}
 		if (x.parent.right != null && x.parent.right.equals(x)) {
+			if(visualize) {
+			      Matrix.stringToGrid(x.state , x.numberOfAgents , x.numberOfPills , x.numberOfHostages);
+			      }
 			return goalFoundNodes(x.parent) + "," + "right";
 		}
 		if (x.parent.kill != null && x.parent.kill.equals(x)) {
+			if(visualize) {
+			      Matrix.stringToGrid(x.state , x.numberOfAgents , x.numberOfPills , x.numberOfHostages);
+			      }
 			return goalFoundNodes(x.parent) + "," + "kill";
 		}
 		if (x.parent.fly != null && x.parent.fly.equals(x)) {
+			if(visualize) {
+			      Matrix.stringToGrid(x.state , x.numberOfAgents , x.numberOfPills , x.numberOfHostages);
+			      }
 			return goalFoundNodes(x.parent) + "," + "fly";
 		}
 		if (x.parent.carry != null && x.parent.carry.equals(x)) {
+			if(visualize) {
+			      Matrix.stringToGrid(x.state , x.numberOfAgents , x.numberOfPills , x.numberOfHostages);
+			      }
 			return goalFoundNodes(x.parent) + "," + "carry";
 		}
 		if (x.parent.takePill != null && x.parent.takePill.equals(x)) {
+			if(visualize) {
+			      Matrix.stringToGrid(x.state , x.numberOfAgents , x.numberOfPills , x.numberOfHostages);
+			      }
 			return goalFoundNodes(x.parent) + "," + "takePill";
 		}
 		if (x.parent.drop != null && x.parent.drop.equals(x)) {
+			if(visualize) {
+			      Matrix.stringToGrid(x.state , x.numberOfAgents , x.numberOfPills , x.numberOfHostages);
+			      }
 			return goalFoundNodes(x.parent) + "," + "drop";
 		}
 		return "";

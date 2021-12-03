@@ -29,24 +29,24 @@ public class Tile {
 
 		if (occupant != null) {
 			switch (occupant.getClass().toString()) {
-			case "class Pill":
+			case "class code.Neo":
+				return "N";
+			case "class code.Pill":
 
 				return "P";
-			case "class Hostage":
+			case "class code.Hostage":
 
 				return "H";
-			case "class Agent":
+			case "class code.Agent":
 
 				return "A";
-			case "class LaunchingPad":
+			case "class code.LaunchingPad":
 
 				return "L";
-			case "class TeleBooth":
+			case "class code.TeleBooth":
 
 				return "T";
-			case "class Neo":
 
-				return "N";
 
 			}
 		}
