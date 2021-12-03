@@ -22,6 +22,8 @@ public class Matrix {
 	public static int nodes;
 	public static int deaths;
 	public static int numberOfExpanded;
+	public static int intialHostages;
+	public static int intialAgents;
 
 	public static Hashtable<String, Integer> stateHash;
 
@@ -293,6 +295,8 @@ public class Matrix {
 
 		Neo tempNeo = new Neo(neoInts[0], neoInts[1], hostagesInts.length / 3, maxCarriedHostagesInts);
 		Node s0;
+		Matrix.intialAgents = agentsInts.length / 2;
+		Matrix.intialHostages = hostagesInts.length / 3;
 
 		switch (algorithm) {
 			case "BF":
@@ -584,7 +588,7 @@ public class Matrix {
 		String grid10 = "5,5;4;1,1;4,1;2,4,0,4,3,2,3,0,4,2,0,1,1,3,2,1;4,0,4,4,1,0;2,0,0,2,0,2,2,0;0,0,62,4,3,45,3,3,39,2,3,40";
 
 		String result = solve(
-				grid1,
+				grid10,
 				"AS2", true);
 		System.out.println(result);
 		// String result1 = solve(

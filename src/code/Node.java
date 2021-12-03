@@ -16,6 +16,7 @@ public class Node {
     int depth;
 
     int numberOfHostages;
+
     int numberOfAgents;
     int numberOfPills;
     int hostagesToMinus;
@@ -898,12 +899,57 @@ public class Node {
             }
 
             if (heuristicType == 2) {
-                // if (kills > 0) {
-                //     newHeuristicCost = (hostagesInts.length / 3) * (kills * 100);
+
+                // WORKS!!
+
+                int tempHeurestic = (hostagesInts.length / 3) - (Matrix.intialHostages -
+                        (hostagesInts.length / 3))
+                        + Matrix.intialAgents - agentsInts.length / 2 - this.kills;
+                int killCoefficient;
+                int normalStepCost = 1;
+
+                if (Matrix.intialHostages * Matrix.intialAgents % ((mapInts[0] + 1) * Matrix.intialHostages) == 0
+                        && this.kills <= 1) {
+
+                    killCoefficient = 15 - (Matrix.intialAgents - 1) * Matrix.intialHostages;
+
+                    newHeuristicCost = (killCoefficient)
+                            * ((hostagesInts.length / 3) - (Matrix.intialHostages - (hostagesInts.length
+                                    / 3))
+                                    + Matrix.intialAgents - agentsInts.length / 2 - this.kills)
+                            + normalStepCost;
+                } else {
+                    killCoefficient = 150; // has to be bigger than 10
+                    normalStepCost = 0;
+                    newHeuristicCost = killCoefficient
+                            * ((hostagesInts.length / 3) - (Matrix.intialHostages - (hostagesInts.length
+                                    / 3))
+                                    + Matrix.intialAgents - agentsInts.length / 2 - this.kills)
+                            + normalStepCost;
+
+                }
+
+                // int killCoefficient = 0;
+                // int normalStepCost = 0;
+                // if (this.deathsToAdd < 1) {
+                // killCoefficient = 1 - this.deathsToAdd;
+                // normalStepCost = 1;
+
+                // newHeuristicCost = killCoefficient
+                // * ((hostagesInts.length / 3) - (Matrix.intialHostages - (hostagesInts.length
+                // / 3))
+                // + Matrix.intialAgents - agentsInts.length / 2 - this.kills)
+                // + normalStepCost;
                 // } else {
-                //     newHeuristicCost = (hostagesInts.length / 3);
+                // normalStepCost = 1;
+                // killCoefficient = 100 - this.deathsToAdd;
+
+                // newHeuristicCost = killCoefficient
+                // * ((hostagesInts.length / 3) - (Matrix.intialHostages - (hostagesInts.length
+                // / 3))
+                // + Matrix.intialAgents - agentsInts.length / 2 - this.kills)
+                // + normalStepCost;
                 // }
-                
 
             }
 
