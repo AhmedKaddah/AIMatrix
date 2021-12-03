@@ -604,8 +604,8 @@ public class Matrix {
 		System.out.println(String.format("Committed memory: %.2f GB",(double)memoryMXBean.getHeapMemoryUsage().getCommitted() /1073741824));
 		
 		String result = solve(
-				grid10,
-				"AS1", true);
+				grid2,
+				"DF", true);
 		System.out.println(result);
 		System.out.println(String.format("Used heap memory: %.2f GB", 
 
